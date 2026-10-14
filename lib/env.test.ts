@@ -1,8 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-vi.mock("server-only", () => ({}));
-
-const { parseEnv } = await import("./env");
+import { parseEnv } from "./env";
 
 describe("parseEnv", () => {
   it("applies defaults when optional values are missing or blank", () => {
