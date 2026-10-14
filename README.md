@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Customer Spending Insights Dashboard
 
-## Getting Started
+A responsive dashboard that helps customers understand their spending: where the money goes, budget trends and what needs attention.
 
-First, run the development server:
+## Getting started
+
+Requires Node 22 (see `.nvmrc`).
 
 ```bash
+npm ci
+cp .env.example .env   # optional, every variable has a default
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command                 | What it does                      |
+| ----------------------- | --------------------------------- |
+| `npm run dev`           | Start the dev server              |
+| `npm run build`         | Production build                  |
+| `npm start`             | Serve the production build        |
+| `npm run lint`          | ESLint                            |
+| `npm run typecheck`     | TypeScript, no emit               |
+| `npm run format:check`  | Prettier check                    |
+| `npm test`              | Unit and component tests (Vitest) |
+| `npm run test:coverage` | Unit tests with coverage          |
+| `npm run test:e2e`      | End-to-end tests (Playwright)     |
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+Code is grouped by feature. Routes stay thin and compose features; shared code never depends on a feature.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/
+  (dashboard)/                  Pages sharing the app shell
+    page.tsx                    Overview
+    transactions/  goals/  insights/
+  api/customers/[customerId]/   Mock API route handlers
+features/
+  <feature>/                    profile, spending, transactions, goals, categories
+    components/                 UI for the feature
+    hooks/                      Client data hooks (React Query)
+    api.ts                      Typed client fetchers
+    schemas.ts                  Zod schemas and types shared by client and server
+    server/                     Data access used by route handlers (server-only)
+components/
+  ui/                           shadcn/ui primitives
+  layout/                       App shell: sidebar, bottom nav, page header
+lib/                            Cross-cutting helpers: env, logging, formatting
+e2e/                            Playwright tests
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Tests sit next to the code they cover (`*.test.ts(x)`). Import boundaries are enforced by ESLint:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `components/` and `lib/` can't import from `features/` or `app/`.
+- `features/` can't import from `app/`.
