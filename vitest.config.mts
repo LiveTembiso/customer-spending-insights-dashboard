@@ -10,6 +10,7 @@ export default defineConfig({
     include: ["**/*.test.{ts,tsx}"],
     exclude: [...configDefaults.exclude, "e2e/**", ".next/**"],
     restoreMocks: true,
+    env: { LOG_LEVEL: "silent" },
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
