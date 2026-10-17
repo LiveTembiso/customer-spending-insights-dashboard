@@ -14,6 +14,15 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## API
+
+The mock API follows the assessment contract under `/api/customers/{customerId}/`. With the dev server running:
+
+- Interactive docs (Swagger UI): [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- OpenAPI 3.1 spec: [http://localhost:3000/api/openapi.json](http://localhost:3000/api/openapi.json)
+
+The spec is generated from the same Zod schemas the routes validate with, so it can't drift from the implementation. The demo customer is `12345`.
+
 ## Scripts
 
 | Command                 | What it does                      |
