@@ -82,7 +82,7 @@ describe("apiGet", () => {
 
     await expect(apiGet("/x", schema)).rejects.toMatchObject({
       status: 502,
-      code: "internal_error",
+      code: "unexpected_status",
       isRetryable: true,
     });
   });

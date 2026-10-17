@@ -42,6 +42,25 @@ describe("OpenAPI spec", () => {
     }
   });
 
+  it("keeps fields whose names are schema keywords", async () => {
+    const { z } = await import("zod");
+    const { toSchema } = await import("./spec");
+    const schema = toSchema(
+      z.object({
+        format: z.string(),
+        pattern: z.string(),
+        $schema: z.string(),
+      }),
+      "output",
+    ) as { properties: object };
+
+    expect(Object.keys(schema.properties)).toEqual([
+      "format",
+      "pattern",
+      "$schema",
+    ]);
+  });
+
   it("documents query parameters with their contract defaults", () => {
     const transactions = spec.paths[
       "/api/customers/{customerId}/transactions"

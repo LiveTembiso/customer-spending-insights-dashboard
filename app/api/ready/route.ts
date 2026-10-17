@@ -15,7 +15,7 @@ export async function GET() {
       env.NEXT_PUBLIC_DEFAULT_CUSTOMER_ID,
       new Date(),
     );
-    if (!records) throw new Error("Default customer has no data");
+    if (!records?.length) throw new Error("Default customer has no data");
     return Response.json({ status: "ready" }, { headers });
   } catch (error) {
     logger.error({ err: error, route: "/api/ready" }, "readiness check failed");

@@ -127,6 +127,16 @@ function tidy(schema: unknown): unknown {
 
   const result: JsonSchema = {};
   for (const [key, value] of Object.entries(schema)) {
+    // Property names are field names, not schema keywords: keep them all.
+    if (key === "properties") {
+      result[key] = Object.fromEntries(
+        Object.entries(value as JsonSchema).map(([name, property]) => [
+          name,
+          tidy(property),
+        ]),
+      );
+      continue;
+    }
     if (key === "$schema") continue;
     if (key === "pattern" && "format" in schema) continue;
     if (
@@ -140,7 +150,10 @@ function tidy(schema: unknown): unknown {
   return result;
 }
 
-function toSchema(schema: z.ZodType, io: "input" | "output"): JsonSchema {
+export function toSchema(
+  schema: z.ZodType,
+  io: "input" | "output",
+): JsonSchema {
   return tidy(
     z.toJSONSchema(schema, { io, unrepresentable: "any" }),
   ) as JsonSchema;
@@ -273,7 +286,7 @@ export function buildOpenApiSpec() {
       description:
         "Mock API serving a customer's spending data. Amounts are in ZAR, " +
         "and days and months are counted in South African time (UTC+2). " +
-        "Every response sends `X-Request-Id`; send your own to trace a request.",
+        "Customer endpoints send `X-Request-Id`; send your own to trace a request.",
     },
     servers: [{ url: "/" }],
     // A mock API: requests aren't authenticated.

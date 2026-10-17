@@ -5,7 +5,8 @@ export type ServerErrorCode =
   "invalid_query" | "customer_not_found" | "internal_error";
 
 /** Codes the client raises itself. */
-export type ClientErrorCode = "invalid_response" | "network_error";
+export type ClientErrorCode =
+  "invalid_response" | "network_error" | "unexpected_status";
 
 export const apiErrorBodySchema = z.object({
   error: z.object({

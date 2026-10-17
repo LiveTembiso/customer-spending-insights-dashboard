@@ -14,7 +14,10 @@ export function makeQueryClient(): QueryClientType {
       queries: {
         // Above zero so data hydrated from the server isn't refetched on mount.
         staleTime: 60 * 1000,
+        // The API client only runs in the browser, so a server-side failure
+        // won't be fixed by retrying; don't hold up rendering for it.
         retry: (failureCount, error) =>
+          !isServer &&
           (!(error instanceof ApiError) || error.isRetryable) &&
           failureCount < MAX_RETRIES,
       },

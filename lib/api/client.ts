@@ -57,9 +57,10 @@ export async function apiGet<Schema extends z.ZodType>(
       const { code, message, issues } = parsed.data.error;
       throw new ApiError(response.status, code, message, issues);
     }
+    // Not our error shape: a proxy page, or a path that isn't an endpoint.
     throw new ApiError(
       response.status,
-      "internal_error",
+      "unexpected_status",
       `Request failed with status ${response.status}.`,
     );
   }

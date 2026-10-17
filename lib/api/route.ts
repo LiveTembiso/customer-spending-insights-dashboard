@@ -55,22 +55,31 @@ function errorResponse(
 type Issues = NonNullable<ApiErrorBody["error"]["issues"]>;
 
 // Empty values (`?limit=`) mean "not set"; otherwise coercion turns them into
-// 0. Repeated keys are rejected rather than silently keeping one value.
+// 0. A parameter the schema reads may only appear once, rather than silently
+// keeping one of its values. Unknown parameters are ignored, as in the schema.
 function readQuery(
   url: URL,
+  schema: z.ZodType,
 ): { values: Record<string, string> } | { issues: Issues } {
-  const values: Record<string, string> = {};
-  const issues: Issues = [];
+  const known =
+    schema instanceof z.ZodObject ? new Set(Object.keys(schema.shape)) : null;
+  const values = new Map<string, string>();
+  const repeated = new Set<string>();
 
   for (const [key, value] of url.searchParams) {
     if (value.trim() === "") continue;
-    if (key in values) {
-      issues.push({ path: key, message: "Expected a single value" });
-    }
-    values[key] = value;
+    if (values.has(key) && (!known || known.has(key))) repeated.add(key);
+    values.set(key, value);
   }
 
-  return issues.length > 0 ? { issues } : { values };
+  return repeated.size > 0
+    ? {
+        issues: [...repeated].map((key) => ({
+          path: key,
+          message: "Expected a single value",
+        })),
+      }
+    : { values: Object.fromEntries(values) };
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -109,7 +118,7 @@ export function customerRoute<Schema extends z.ZodType, Result>({
 
       let query: z.output<Schema> = undefined as z.output<Schema>;
       if (querySchema) {
-        const raw = readQuery(url);
+        const raw = readQuery(url, querySchema);
         const parsed =
           "values" in raw ? querySchema.safeParse(raw.values) : undefined;
         if (!parsed?.success) {

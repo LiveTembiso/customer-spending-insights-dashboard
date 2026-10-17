@@ -55,6 +55,27 @@ describe("customerRoute", () => {
     ]);
   });
 
+  it("reports a key repeated several times once", async () => {
+    const response = await route(
+      new Request("http://test/?limit=1&limit=2&limit=3"),
+      params(),
+    );
+
+    expect((await errorOf(response)).issues).toHaveLength(1);
+  });
+
+  it.each(["constructor", "toString", "utm_source"])(
+    "ignores the unknown parameter %s, even when repeated",
+    async (key) => {
+      const response = await route(
+        new Request(`http://test/?${key}=a&${key}=b`),
+        params(),
+      );
+
+      expect(response.status).toBe(200);
+    },
+  );
+
   it("returns 404 for an unknown customer", async () => {
     const response = await route(new Request("http://test/"), params("nope"));
 
