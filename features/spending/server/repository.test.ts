@@ -6,7 +6,11 @@ import {
   summaryResponseSchema,
   trendsResponseSchema,
 } from "../schemas";
-import { periodRange, previousPeriodRange } from "./periods";
+import {
+  previousPeriodCutoff,
+  periodRange,
+  previousPeriodRange,
+} from "./periods";
 import { getCategoryBreakdown, getSummary, getTrends } from "./repository";
 
 const NOW = new Date("2026-10-14T06:00:00Z");
@@ -27,7 +31,36 @@ describe("periods", () => {
   });
 });
 
+describe("previousPeriodCutoff", () => {
+  it("compares with the same time of day one period ago", () => {
+    expect(new Date(previousPeriodCutoff("7d", NOW)).toISOString()).toBe(
+      "2026-10-07T06:00:00.000Z",
+    );
+  });
+});
+
 describe("getSummary", () => {
+  it("has no top category or comparison before any spending", () => {
+    const summary = summaryResponseSchema.parse(
+      getSummary("12345", { period: "7d" }, new Date("2023-01-10T10:00:00Z")),
+    );
+
+    expect(summary).toMatchObject({
+      totalSpent: 0,
+      topCategory: null,
+      comparedToPrevious: { spentChange: 0, transactionChange: 0 },
+    });
+  });
+
+  it("can't compare a first week with the empty one before it", () => {
+    const summary = summaryResponseSchema.parse(
+      getSummary("12345", { period: "7d" }, new Date("2023-01-20T10:00:00Z")),
+    );
+
+    expect(summary.totalSpent).toBeGreaterThan(0);
+    expect(summary.comparedToPrevious.spentChange).toBeNull();
+  });
+
   it("returns undefined for an unknown customer", () => {
     expect(getSummary("99999", { period: "30d" }, NOW)).toBeUndefined();
   });

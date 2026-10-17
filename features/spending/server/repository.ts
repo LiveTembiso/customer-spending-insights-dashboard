@@ -2,6 +2,10 @@ import "server-only";
 
 import { CATEGORIES } from "@/features/categories/catalogue";
 import type { TransactionRecord } from "@/features/transactions/server/generate";
+import {
+  groupByMonth,
+  totalCents,
+} from "@/features/transactions/server/records";
 import { getCustomerTransactions } from "@/features/transactions/server/store";
 import { addMonths, toMonthKey } from "@/lib/dates";
 import { percentChange, roundTo, toRands } from "@/lib/money";
@@ -18,17 +22,14 @@ import {
   type DayRange,
   isInRange,
   periodRange,
+  previousPeriodCutoff,
   previousPeriodRange,
 } from "./periods";
-
-function total(records: readonly TransactionRecord[]) {
-  return records.reduce((sum, record) => sum + record.amount, 0);
-}
 
 function average(records: readonly TransactionRecord[]) {
   return records.length === 0
     ? 0
-    : roundTo(toRands(total(records)) / records.length, 2);
+    : roundTo(toRands(totalCents(records)) / records.length, 2);
 }
 
 function inRange(records: readonly TransactionRecord[], range: DayRange) {
@@ -38,7 +39,7 @@ function inRange(records: readonly TransactionRecord[], range: DayRange) {
 function spendByCategory(records: readonly TransactionRecord[]) {
   return CATEGORIES.map((category) => {
     const matching = records.filter((r) => r.category === category.name);
-    return { category, amount: total(matching), count: matching.length };
+    return { category, amount: totalCents(matching), count: matching.length };
   }).sort((a, b) => b.amount - a.amount);
 }
 
@@ -51,16 +52,20 @@ export function getSummary(
   if (!records) return undefined;
 
   const current = inRange(records, periodRange(period, now));
-  const previous = inRange(records, previousPeriodRange(period, now));
+  const cutoff = previousPeriodCutoff(period, now);
+  const previous = inRange(records, previousPeriodRange(period, now)).filter(
+    (record) => record.timestamp <= cutoff,
+  );
+  const [top] = spendByCategory(current);
 
   return {
     period,
-    totalSpent: toRands(total(current)),
+    totalSpent: toRands(totalCents(current)),
     transactionCount: current.length,
     averageTransaction: average(current),
-    topCategory: spendByCategory(current)[0].category.name,
+    topCategory: top.amount > 0 ? top.category.name : null,
     comparedToPrevious: {
-      spentChange: percentChange(total(current), total(previous)),
+      spentChange: percentChange(totalCents(current), totalCents(previous)),
       transactionChange: percentChange(current.length, previous.length),
     },
   };
@@ -79,7 +84,7 @@ export function getCategoryBreakdown(
       ? { start: query.startDate, end: query.endDate }
       : periodRange(query.period, now);
   const matching = inRange(records, range);
-  const totalAmount = total(matching);
+  const totalAmount = totalCents(matching);
 
   return {
     dateRange: { startDate: range.start, endDate: range.end },
@@ -106,17 +111,16 @@ export function getTrends(
   const records = getCustomerTransactions(customerId, now);
   if (!records) return undefined;
 
+  const byMonth = groupByMonth(records);
   const currentMonth = toMonthKey(now);
-  const monthKeys = Array.from({ length: months }, (_, index) =>
-    addMonths(currentMonth, index - months + 1),
-  );
 
   return {
-    trends: monthKeys.map((month) => {
-      const matching = records.filter((r) => r.day.startsWith(month));
+    trends: Array.from({ length: months }, (_, index) => {
+      const month = addMonths(currentMonth, index - months + 1);
+      const matching = byMonth.get(month) ?? [];
       return {
         month,
-        totalSpent: toRands(total(matching)),
+        totalSpent: toRands(totalCents(matching)),
         transactionCount: matching.length,
         averageTransaction: average(matching),
       };

@@ -10,7 +10,11 @@ export function roundTo(value: number, decimals: number): number {
   return Math.round(value * factor) / factor;
 }
 
-export function percentChange(current: number, previous: number): number {
-  if (previous === 0) return current === 0 ? 0 : 100;
+/** Percentage change, to one decimal, or null when there's nothing to compare with. */
+export function percentChange(
+  current: number,
+  previous: number,
+): number | null {
+  if (previous === 0) return current === 0 ? 0 : null;
   return roundTo(((current - previous) / previous) * 100, 1);
 }

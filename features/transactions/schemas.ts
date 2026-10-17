@@ -32,7 +32,13 @@ export const transactionsQuerySchema = z
     startDate: isoDateSchema.optional(),
     endDate: isoDateSchema.optional(),
     sortBy: sortBySchema.default("date_desc"),
-    q: z.string().trim().min(1).max(100).optional(),
+    // A cleared search box sends `q=`; treat it as no search.
+    q: z
+      .string()
+      .trim()
+      .max(100)
+      .optional()
+      .transform((value) => value || undefined),
   })
   .refine(
     (query) =>

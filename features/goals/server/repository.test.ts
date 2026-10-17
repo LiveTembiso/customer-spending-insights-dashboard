@@ -15,12 +15,20 @@ describe("getGoals", () => {
 
     expect(goals.length).toBeGreaterThan(0);
     for (const goal of goals) {
-      expect(goal.daysRemaining).toBe(17);
+      expect(goal.daysRemaining).toBe(18);
       expect(goal.percentageUsed).toBeCloseTo(
         (goal.currentSpent / goal.monthlyBudget) * 100,
         1,
       );
     }
+  });
+
+  it("counts the last day of the month as a day remaining", () => {
+    const { goals } = goalsResponseSchema.parse(
+      getGoals("12345", new Date("2026-10-31T06:00:00Z")),
+    );
+
+    expect(goals[0].daysRemaining).toBe(1);
   });
 });
 
@@ -32,6 +40,8 @@ describe("goalStatus", () => {
     { used: 92, elapsed: 95, status: "warning" },
     { used: 100, elapsed: 100, status: "warning" },
     { used: 100.1, elapsed: 100, status: "exceeded" },
+    // Rounds to 100.0 for display but is still over budget.
+    { used: 100.036, elapsed: 100, status: "exceeded" },
   ])("is $status at $used% used, $elapsed% through the month", (row) => {
     expect(goalStatus(row.used, row.elapsed)).toBe(row.status);
   });

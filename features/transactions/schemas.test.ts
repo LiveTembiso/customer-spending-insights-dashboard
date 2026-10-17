@@ -23,9 +23,12 @@ describe("transactionsQuerySchema", () => {
     { offset: "-1" },
     { sortBy: "merchant_asc" },
     { category: "Travel" },
-    { q: "   " },
   ])("rejects %o", (query) => {
     expect(transactionsQuerySchema.safeParse(query).success).toBe(false);
+  });
+
+  it("treats a blank search as no search", () => {
+    expect(transactionsQuerySchema.parse({ q: "   " }).q).toBeUndefined();
   });
 
   it("trims the search term", () => {

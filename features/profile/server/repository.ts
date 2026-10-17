@@ -1,5 +1,6 @@
 import "server-only";
 
+import { totalCents } from "@/features/transactions/server/records";
 import { getCustomerTransactions } from "@/features/transactions/server/store";
 import { toRands } from "@/lib/money";
 
@@ -16,7 +17,7 @@ export function getProfile(
 
   return {
     ...customer,
-    totalSpent: toRands(records.reduce((sum, r) => sum + r.amount, 0)),
+    totalSpent: toRands(totalCents(records)),
     currency: "ZAR",
   };
 }

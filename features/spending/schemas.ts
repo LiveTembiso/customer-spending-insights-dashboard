@@ -26,7 +26,8 @@ export const summaryResponseSchema = z.object({
   totalSpent: amountSchema,
   transactionCount: z.int().nonnegative(),
   averageTransaction: amountSchema,
-  topCategory: categoryNameSchema,
+  // Null when nothing was spent in the period.
+  topCategory: categoryNameSchema.nullable(),
   comparedToPrevious: z.object({
     spentChange: percentChangeSchema,
     transactionChange: percentChangeSchema,

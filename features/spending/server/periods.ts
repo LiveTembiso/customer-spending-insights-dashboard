@@ -26,6 +26,14 @@ export function previousPeriodRange(period: Period, now: Date): DayRange {
   return { start: addDays(end, 1 - PERIOD_DAYS[period]), end };
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// The current period is only partly over, so the previous one is cut off at
+// the same time of day: exactly one period length before now.
+export function previousPeriodCutoff(period: Period, now: Date): number {
+  return now.getTime() - PERIOD_DAYS[period] * DAY_MS;
+}
+
 export function isInRange(day: DayKey, range: DayRange): boolean {
   return day >= range.start && day <= range.end;
 }

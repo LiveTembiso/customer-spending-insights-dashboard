@@ -17,8 +17,8 @@ describe("money", () => {
     expect(percentChange(47, 48.55)).toBe(-3.2);
   });
 
-  it("handles a zero previous value", () => {
+  it("returns null when there is nothing to compare with", () => {
     expect(percentChange(0, 0)).toBe(0);
-    expect(percentChange(100, 0)).toBe(100);
+    expect(percentChange(100, 0)).toBeNull();
   });
 });

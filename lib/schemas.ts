@@ -14,7 +14,9 @@ export const hexColorSchema = z
 
 export const amountSchema = z.number().nonnegative();
 
-export const percentChangeSchema = z.number();
+// Signed, since spending can drop. Null when the previous period had nothing
+// to compare with.
+export const percentChangeSchema = z.number().nullable();
 
 export const currencySchema = z.literal("ZAR");
 
