@@ -12,7 +12,11 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools buttonPosition="bottom-left" />
+      {process.env.NODE_ENV === "development" && (
+        <div className="fixed right-3 bottom-24 z-50 md:bottom-3">
+          <ReactQueryDevtools buttonPosition="relative" />
+        </div>
+      )}
     </QueryClientProvider>
   );
 }

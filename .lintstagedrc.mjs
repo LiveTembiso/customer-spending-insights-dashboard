@@ -3,7 +3,8 @@ const config = {
     "eslint --fix --max-warnings=0",
     "prettier --write",
   ],
-  "*.{ts,mts,tsx}": () => "tsc --noEmit",
+  // Route types live in .next/, which a fresh clone doesn't have yet.
+  "*.{ts,mts,tsx}": () => ["next typegen", "tsc --noEmit"],
   "*.{json,md,css,yml,yaml}": "prettier --write",
 };
 
