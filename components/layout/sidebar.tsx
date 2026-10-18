@@ -12,10 +12,10 @@ interface SidebarProps {
 
 export function Sidebar({ account, badges }: SidebarProps) {
   return (
-    <aside className="sticky top-0 hidden h-dvh flex-col gap-7 bg-sidebar px-4 py-6 text-white md:flex">
+    <aside className="sticky top-0 hidden h-dvh flex-col gap-7 overflow-y-auto bg-sidebar px-4 py-6 text-white md:flex">
       <Link
         href="/"
-        className="rounded-[10px] px-1 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+        className="rounded-[10px] px-1 outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring"
       >
         <Logo />
       </Link>

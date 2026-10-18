@@ -29,7 +29,7 @@ export function NavLink({ href, label, icon, variant, badge }: NavLinkProps) {
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+        "outline-hidden focus-visible:ring-2 focus-visible:ring-sidebar-ring",
         variant === "sidebar" &&
           "flex min-h-11 items-center gap-3 rounded-[10px] px-3.5 py-3 text-[15px] font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
         variant === "sidebar" &&
@@ -40,7 +40,18 @@ export function NavLink({ href, label, icon, variant, badge }: NavLinkProps) {
         variant === "tabbar" && active && "font-bold text-white",
       )}
     >
-      {icon}
+      {variant === "tabbar" ? (
+        <span
+          className={cn(
+            "flex h-7 w-14 items-center justify-center rounded-full",
+            active && "bg-nav-active",
+          )}
+        >
+          {icon}
+        </span>
+      ) : (
+        icon
+      )}
       <span>{label}</span>
       {badge && (
         <span

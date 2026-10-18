@@ -19,6 +19,7 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
   --color-navy: var(--navy);
+  --color-nav-active: var(--nav-active);
   --color-navy-raised: var(--navy-raised);
   --color-navy-foreground: var(--navy-foreground);
   --color-navy-muted: var(--navy-muted);
@@ -58,7 +59,6 @@
 }
 
 :root {
-  /* R2 "Action-first bento" palette. Text pairs pass WCAG AA on their surfaces. */
   --background: #eef1f5;
   --foreground: #0e1b2c;
   --card: #ffffff;
@@ -105,6 +105,7 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #22344d;
   --sidebar-ring: #7aa2ff;
+  --nav-active: #2a6fd6;
 }
 
 .dark {
@@ -144,6 +145,7 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    /* Keeps focused content clear of the fixed phone tab bar. */
+    @apply scroll-pb-28 font-sans md:scroll-pb-0;
   }
 }

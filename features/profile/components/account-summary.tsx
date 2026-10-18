@@ -1,15 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { initials } from "../initials";
 import { getCurrentProfile } from "../server/current";
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .map((part) => part[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
 
 const capitalise = (value: string) =>
   value.charAt(0).toUpperCase() + value.slice(1);

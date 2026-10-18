@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { QuietBoundary } from "@/components/layout/quiet-boundary";
 import { GoalsAttentionBadge } from "@/features/goals/components/goals-attention-badge";
 import {
   AccountAvatar,
@@ -13,20 +14,26 @@ export default function DashboardLayout({ children }: LayoutProps<"/">) {
   return (
     <AppShell
       account={
-        <Suspense fallback={<AccountSummarySkeleton />}>
-          <AccountSummary />
-        </Suspense>
+        <QuietBoundary>
+          <Suspense fallback={<AccountSummarySkeleton />}>
+            <AccountSummary />
+          </Suspense>
+        </QuietBoundary>
       }
       accountCompact={
-        <Suspense fallback={<AccountAvatarSkeleton />}>
-          <AccountAvatar />
-        </Suspense>
+        <QuietBoundary>
+          <Suspense fallback={<AccountAvatarSkeleton />}>
+            <AccountAvatar />
+          </Suspense>
+        </QuietBoundary>
       }
       badges={{
         "/goals": (
-          <Suspense>
-            <GoalsAttentionBadge />
-          </Suspense>
+          <QuietBoundary>
+            <Suspense>
+              <GoalsAttentionBadge />
+            </Suspense>
+          </QuietBoundary>
         ),
       }}
     >
