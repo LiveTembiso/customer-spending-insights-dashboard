@@ -1,12 +1,14 @@
 import { Suspense } from "react";
 
 import { SectionCardSkeleton } from "@/components/layout/section-card";
+import { GoalsCard } from "@/features/goals/components/goals-card";
 import { CategoryBreakdownCard } from "@/features/spending/components/category-breakdown-card";
 import {
   MonthSpendCard,
   MonthSpendCardSkeleton,
 } from "@/features/spending/components/month-spend-card";
 import { MonthlyTrendCard } from "@/features/spending/components/monthly-trend-card";
+import { RecentTransactionsCard } from "@/features/transactions/components/recent-transactions-card";
 
 export default function OverviewPage() {
   return (
@@ -44,7 +46,14 @@ export default function OverviewPage() {
         <Suspense fallback={<SectionCardSkeleton lines={6} />}>
           <MonthlyTrendCard />
         </Suspense>
+        <Suspense fallback={<SectionCardSkeleton lines={6} />}>
+          <GoalsCard />
+        </Suspense>
       </div>
+
+      <Suspense fallback={<SectionCardSkeleton lines={5} />}>
+        <RecentTransactionsCard />
+      </Suspense>
     </div>
   );
 }
