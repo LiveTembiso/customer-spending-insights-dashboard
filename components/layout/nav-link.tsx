@@ -16,7 +16,8 @@ interface NavLinkProps {
 }
 
 function isActive(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export function NavLink({ href, label, icon, variant, badge }: NavLinkProps) {

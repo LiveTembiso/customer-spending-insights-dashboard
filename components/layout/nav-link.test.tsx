@@ -18,6 +18,8 @@ describe("NavLink", () => {
     ["/transactions", "/transactions", true],
     ["/transactions?category=Dining", "/transactions", true],
     ["/goals", "/transactions", false],
+    ["/transactions/txn_001", "/transactions", true],
+    ["/goals-history", "/goals", false],
   ])("on %s, the %s link is current: %s", (path, href, expected) => {
     pathname.current = path.split("?")[0];
     const link = renderLink(href);

@@ -18,12 +18,6 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-6: var(--chart-6);
-  --color-chart-1: var(--chart-1);
   --color-navy: var(--navy);
   --color-navy-raised: var(--navy-raised);
   --color-navy-foreground: var(--navy-foreground);
@@ -103,14 +97,6 @@
   --success-foreground: #2b6a45;
   --attention: #f2a25c;
 
-  /* Category marks, adjusted from the API colours for contrast on white */
-  --chart-1: #e0655a;
-  --chart-2: #24a99e;
-  --chart-3: #3b7dd8;
-  --chart-4: #e8b33a;
-  --chart-5: #9467d1;
-  --chart-6: #6bb6e8;
-
   --sidebar: #0e1b2c;
   --sidebar-foreground: #c3ccd8;
   --sidebar-primary: #1f5fbf;
@@ -140,11 +126,6 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);

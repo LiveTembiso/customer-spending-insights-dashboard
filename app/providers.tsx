@@ -12,7 +12,8 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools buttonPosition="bottom-right" />
+      {/* Top corner: at the bottom it covers the phone tab bar. */}
+      <ReactQueryDevtools buttonPosition="top-right" />
     </QueryClientProvider>
   );
 }
