@@ -11,7 +11,12 @@ import {
   periodRange,
   previousPeriodRange,
 } from "./periods";
-import { getCategoryBreakdown, getSummary, getTrends } from "./repository";
+import {
+  getCategoryBreakdown,
+  getMonthToDate,
+  getSummary,
+  getTrends,
+} from "./repository";
 
 const NOW = new Date("2026-10-14T06:00:00Z");
 
@@ -145,5 +150,53 @@ describe("getTrends", () => {
       transactionCount: 0,
       averageTransaction: 0,
     });
+  });
+});
+
+describe("getMonthToDate", () => {
+  it("compares this month so far with the same days of last month", () => {
+    const result = getMonthToDate("12345", NOW);
+
+    expect(result?.range).toEqual({ start: "2026-10-01", end: "2026-10-14" });
+    expect(result?.previousRange).toEqual({
+      start: "2026-09-01",
+      end: "2026-09-14",
+    });
+  });
+
+  it("uses all of a shorter last month", () => {
+    const result = getMonthToDate("12345", new Date("2026-03-30T08:00:00Z"));
+
+    expect(result?.previousRange).toEqual({
+      start: "2026-02-01",
+      end: "2026-02-28",
+    });
+  });
+
+  it("matches the transactions in its range", () => {
+    const result = getMonthToDate("12345", NOW);
+    const breakdown = getCategoryBreakdown(
+      "12345",
+      { period: "30d", startDate: "2026-10-01", endDate: "2026-10-14" },
+      NOW,
+    );
+
+    expect(result?.totalSpent).toBe(breakdown?.totalAmount);
+    expect(result?.transactionCount).toBe(
+      breakdown?.categories.reduce((sum, c) => sum + c.transactionCount, 0),
+    );
+  });
+
+  it("can't compare with a month that had no spending", () => {
+    const result = getMonthToDate("12345", new Date("2023-01-20T10:00:00Z"));
+
+    expect(result?.comparedToPrevious).toEqual({
+      spentChange: null,
+      transactionChange: null,
+    });
+  });
+
+  it("is undefined for an unknown customer", () => {
+    expect(getMonthToDate("nope", NOW)).toBeUndefined();
   });
 });
