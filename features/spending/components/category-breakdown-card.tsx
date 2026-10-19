@@ -30,7 +30,7 @@ export async function CategoryBreakdownCard() {
           {/* The list carries every figure, so the ring is decorative. */}
           <div
             aria-hidden
-            className="flex size-[150px] shrink-0 items-center justify-center rounded-full shadow-[inset_0_0_0_1px_rgba(14,27,44,0.18)]"
+            className="flex size-[150px] shrink-0 items-center justify-center rounded-full shadow-[inset_0_0_0_1px_rgba(14,27,44,0.18)] forced-color-adjust-none"
             style={{ background: donutGradient(spent) }}
           >
             <div className="flex size-[100px] flex-col items-center justify-center gap-0.5 rounded-full bg-card shadow-[0_0_0_1px_rgba(14,27,44,0.18)]">

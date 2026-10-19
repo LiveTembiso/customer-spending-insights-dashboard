@@ -75,7 +75,10 @@ export async function RecentTransactionsCard() {
             ))}
           </ul>
 
-          <table className="hidden w-full border-collapse text-sm md:table">
+          <table
+            aria-labelledby="recent-title"
+            className="hidden w-full border-collapse text-sm md:table"
+          >
             <thead>
               <tr className="bg-muted text-left text-[13px] text-muted-foreground">
                 <th

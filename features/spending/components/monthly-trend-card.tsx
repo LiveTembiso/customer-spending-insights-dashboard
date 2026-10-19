@@ -48,7 +48,7 @@ export async function MonthlyTrendCard() {
         <div
           role="img"
           aria-label={`Monthly spending, ${formatMonthLong(first.month)} to ${formatMonthLong(last.month)}: ${summary}`}
-          className="grid h-[180px] grid-cols-6 items-end gap-2.5 border-b border-border bg-[linear-gradient(var(--background)_1px,transparent_1px)] bg-[length:100%_90px] sm:gap-3"
+          className="grid h-[180px] grid-cols-6 items-end gap-2.5 border-b border-border bg-[linear-gradient(var(--background)_1px,transparent_1px)] bg-[length:100%_90px] forced-color-adjust-none sm:gap-3"
         >
           {trends.map((trend, index) => {
             const current = index === trends.length - 1;
@@ -90,7 +90,7 @@ export async function MonthlyTrendCard() {
       <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
         <span
           aria-hidden
-          className="size-3.5 shrink-0 rounded-[3px] border-2 border-primary"
+          className="size-3.5 shrink-0 rounded-[3px] border-2 border-primary forced-color-adjust-none"
           style={{
             background:
               "repeating-linear-gradient(135deg, var(--primary) 0 2px, var(--card) 2px 5px)",

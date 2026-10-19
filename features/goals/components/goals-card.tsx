@@ -76,7 +76,10 @@ function GoalRow({ goal }: { goal: Goal }) {
         <div
           role="img"
           aria-label={`${Math.round(goal.percentageUsed)} percent of the ${goal.category} budget used`}
-          className={cn("h-2 overflow-hidden rounded-full", status.track)}
+          className={cn(
+            "h-2 overflow-hidden rounded-full forced-color-adjust-none",
+            status.track,
+          )}
         >
           <div
             className={cn("h-full rounded-full", status.bar)}
