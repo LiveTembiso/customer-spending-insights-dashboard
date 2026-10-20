@@ -1,0 +1,57 @@
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+
+import type { Goal } from "../schemas";
+import { getCurrentGoals } from "../server/current";
+import { GoalsCard } from "./goals-card";
+
+vi.mock("../server/current", () => ({ getCurrentGoals: vi.fn() }));
+
+const goal = (overrides: Partial<Goal>): Goal => ({
+  id: "goal_001",
+  category: "Groceries",
+  monthlyBudget: 1000,
+  currentSpent: 500,
+  percentageUsed: 50,
+  daysRemaining: 10,
+  status: "on_track",
+  ...overrides,
+});
+
+async function renderCard(goals: Goal[]) {
+  vi.mocked(getCurrentGoals).mockResolvedValue({ goals });
+  render(await GoalsCard());
+}
+
+describe("GoalsCard", () => {
+  it("shows a goal's status, spend and days left", async () => {
+    await renderCard([goal({})]);
+
+    expect(screen.getByText("On track")).toBeInTheDocument();
+    expect(
+      screen.getByText(/R500\.00 of R1\s000\.00 · 10 days left/),
+    ).toBeInTheDocument();
+  });
+
+  it("caps the bar of an overspent goal but reports the real figure", async () => {
+    await renderCard([
+      goal({ currentSpent: 1120, percentageUsed: 112, status: "exceeded" }),
+    ]);
+    const bar = screen.getByRole("img", {
+      name: "112 percent of the Groceries budget used",
+    });
+
+    expect(screen.getByText("Over budget")).toBeInTheDocument();
+    expect(bar.firstElementChild).toHaveStyle({ width: "100%" });
+  });
+
+  it("uses the singular for the last day", async () => {
+    await renderCard([goal({ daysRemaining: 1 })]);
+    expect(screen.getByText(/1 day left/)).toBeInTheDocument();
+  });
+
+  it("says so when no goals are set", async () => {
+    await renderCard([]);
+    expect(screen.getByText("No goals set yet.")).toBeInTheDocument();
+  });
+});

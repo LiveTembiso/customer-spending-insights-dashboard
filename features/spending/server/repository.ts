@@ -7,7 +7,15 @@ import {
   totalCents,
 } from "@/features/transactions/server/records";
 import { getCustomerTransactions } from "@/features/transactions/server/store";
-import { addMonths, toMonthKey } from "@/lib/dates";
+import {
+  addDays,
+  addMonths,
+  dayOfMonth,
+  daysInMonth,
+  startOfDay,
+  toDayKey,
+  toMonthKey,
+} from "@/lib/dates";
 import { percentChange, roundTo, toRands } from "@/lib/money";
 
 import type {
@@ -125,5 +133,57 @@ export function getTrends(
         averageTransaction: average(matching),
       };
     }),
+  };
+}
+
+export interface MonthToDate {
+  range: DayRange;
+  previousRange: DayRange;
+  totalSpent: number;
+  transactionCount: number;
+  comparedToPrevious: {
+    spentChange: number | null;
+    transactionChange: number | null;
+  };
+}
+
+// Compared with the same days of last month up to the same time of day, so a
+// half-finished month isn't measured against a whole one.
+export function getMonthToDate(
+  customerId: string,
+  now: Date,
+): MonthToDate | undefined {
+  const records = getCustomerTransactions(customerId, now);
+  if (!records) return undefined;
+
+  const today = toDayKey(now);
+  const month = toMonthKey(now);
+  const previousMonth = addMonths(month, -1);
+  const previousDays = daysInMonth(previousMonth);
+  const clipped = dayOfMonth(today) > previousDays;
+  const previousEnd = `${previousMonth}-${String(
+    clipped ? previousDays : dayOfMonth(today),
+  ).padStart(2, "0")}`;
+  const cutoff = clipped
+    ? startOfDay(addDays(previousEnd, 1)).getTime() - 1
+    : startOfDay(previousEnd).getTime() +
+      (now.getTime() - startOfDay(today).getTime());
+
+  const range = { start: `${month}-01`, end: today };
+  const previousRange = { start: `${previousMonth}-01`, end: previousEnd };
+  const current = inRange(records, range);
+  const previous = inRange(records, previousRange).filter(
+    (record) => record.timestamp <= cutoff,
+  );
+
+  return {
+    range,
+    previousRange,
+    totalSpent: toRands(totalCents(current)),
+    transactionCount: current.length,
+    comparedToPrevious: {
+      spentChange: percentChange(totalCents(current), totalCents(previous)),
+      transactionChange: percentChange(current.length, previous.length),
+    },
   };
 }
