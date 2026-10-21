@@ -3,15 +3,10 @@ import "server-only";
 import type { CategoryName } from "@/features/categories/schemas";
 import { inMonth, totalCents } from "@/features/transactions/server/records";
 import { getCustomerTransactions } from "@/features/transactions/server/store";
-import {
-  dayOfMonth,
-  daysInMonth,
-  startOfDay,
-  toDayKey,
-  toMonthKey,
-} from "@/lib/dates";
+import { dayOfMonth, daysInMonth, toDayKey, toMonthKey } from "@/lib/dates";
 import { roundTo, toRands } from "@/lib/money";
 
+import { monthElapsedPercent } from "../pace";
 import type { GoalStatus, GoalsResponse } from "../schemas";
 
 interface Budget {
@@ -28,7 +23,6 @@ const BUDGETS: Record<string, readonly Budget[]> = {
   ],
 };
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const WARNING_THRESHOLD = 90;
 const PACE_TOLERANCE = 10;
 
@@ -55,10 +49,7 @@ export function getGoals(
 
   const month = toMonthKey(now);
   const monthLength = daysInMonth(month);
-  const monthStart = startOfDay(`${month}-01`).getTime();
-  // Fraction of the month gone so far, counting today only partly.
-  const monthElapsed =
-    ((now.getTime() - monthStart) / (monthLength * DAY_MS)) * 100;
+  const monthElapsed = monthElapsedPercent(now);
   // Today still counts as a day left to spend in.
   const daysRemaining = monthLength - dayOfMonth(toDayKey(now)) + 1;
   const thisMonth = inMonth(records, month);

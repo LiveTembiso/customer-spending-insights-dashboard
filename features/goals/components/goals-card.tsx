@@ -1,46 +1,12 @@
-import { CircleAlert, CircleCheck, TriangleAlert } from "lucide-react";
-
 import { SectionCard } from "@/components/layout/section-card";
 import { getCategory } from "@/features/categories/catalogue";
 import { CategoryIcon } from "@/features/categories/components/category-icon";
 import { formatRands } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-import type { Goal, GoalStatus } from "../schemas";
+import type { Goal } from "../schemas";
 import { getCurrentGoals } from "../server/current";
-
-const STATUS: Record<
-  GoalStatus,
-  {
-    label: string;
-    icon: typeof CircleCheck;
-    pill: string;
-    bar: string;
-    track: string;
-  }
-> = {
-  on_track: {
-    label: "On track",
-    icon: CircleCheck,
-    pill: "bg-success-surface text-success-foreground",
-    bar: "bg-success",
-    track: "bg-background",
-  },
-  warning: {
-    label: "Warning",
-    icon: TriangleAlert,
-    pill: "bg-warning-track text-warning-foreground",
-    bar: "bg-warning",
-    track: "bg-warning-track",
-  },
-  exceeded: {
-    label: "Over budget",
-    icon: CircleAlert,
-    pill: "bg-warning-track text-warning-foreground",
-    bar: "bg-warning",
-    track: "bg-warning-track",
-  },
-};
+import { GOAL_STATUS } from "../status";
 
 function daysLeft(days: number) {
   return days === 1 ? "1 day left" : `${days} days left`;
@@ -48,7 +14,7 @@ function daysLeft(days: number) {
 
 function GoalRow({ goal }: { goal: Goal }) {
   const category = getCategory(goal.category);
-  const status = STATUS[goal.status];
+  const status = GOAL_STATUS[goal.status];
   const Icon = status.icon;
 
   return (
