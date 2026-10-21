@@ -9,6 +9,7 @@ import {
   startOfDay,
   toDayKey,
   toMonthKey,
+  toTimeOfDay,
 } from "./dates";
 
 describe("dates", () => {
@@ -49,5 +50,9 @@ describe("dates", () => {
 
   it("returns the weekday of a day", () => {
     expect(dayOfWeek("2024-09-16")).toBe(1); // Monday
+  });
+
+  it("tells the time of day in SAST", () => {
+    expect(toTimeOfDay(new Date("2026-10-16T22:30:00Z"))).toBe("00:30");
   });
 });

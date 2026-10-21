@@ -57,8 +57,8 @@ export async function MonthlyTrendCard() {
                 key={trend.month}
                 className={
                   current
-                    ? "rounded-t-md border-2 border-b-0 border-primary"
-                    : "rounded-t-md bg-primary"
+                    ? "rounded-t-sm border-2 border-b-0 border-primary"
+                    : "rounded-t-sm bg-primary"
                 }
                 style={{
                   height: `${(trend.totalSpent / top) * 100}%`,
@@ -87,17 +87,6 @@ export async function MonthlyTrendCard() {
           ))}
         </div>
       </div>
-      <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
-        <span
-          aria-hidden
-          className="size-3.5 shrink-0 rounded-[3px] border-2 border-primary forced-color-adjust-none"
-          style={{
-            background:
-              "repeating-linear-gradient(135deg, var(--primary) 0 2px, var(--card) 2px 5px)",
-          }}
-        />
-        Striped bar: month to date ({progress})
-      </p>
     </SectionCard>
   );
 }

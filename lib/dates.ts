@@ -13,6 +13,11 @@ export function toDayKey(instant: Date | number): DayKey {
   return sastWallClock(instant).toISOString().slice(0, 10);
 }
 
+/** SAST time of day as HH:MM. */
+export function toTimeOfDay(instant: Date | number): string {
+  return sastWallClock(instant).toISOString().slice(11, 16);
+}
+
 export function toMonthKey(instant: Date | number): MonthKey {
   return toDayKey(instant).slice(0, 7);
 }

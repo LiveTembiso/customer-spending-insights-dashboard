@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  formatDateRange,
   formatDay,
+  formatDayHeading,
   formatDayRange,
   formatDayRangeLong,
   formatMonthLong,
@@ -55,6 +57,41 @@ describe("formatDayRange", () => {
 describe("formatDay", () => {
   it("writes a short date with the year", () => {
     expect(formatDay("2026-09-16")).toBe("16 Sep 2026");
+  });
+});
+
+describe("formatDateRange", () => {
+  it("names the year once when both ends share it", () => {
+    expect(formatDateRange("2026-09-21", "2026-10-20")).toBe(
+      "21 Sep – 20 Oct 2026",
+    );
+  });
+
+  it("names both years across a new year", () => {
+    expect(formatDateRange("2025-12-20", "2026-01-05")).toBe(
+      "20 Dec 2025 – 5 Jan 2026",
+    );
+  });
+
+  it("collapses a single day", () => {
+    expect(formatDateRange("2026-10-20", "2026-10-20")).toBe("20 Oct 2026");
+  });
+});
+
+describe("formatDayHeading", () => {
+  const today = "2026-10-20";
+
+  it("says today and yesterday", () => {
+    expect(formatDayHeading("2026-10-20", today)).toBe("Today");
+    expect(formatDayHeading("2026-10-19", today)).toBe("Yesterday");
+  });
+
+  it("names the weekday for older days", () => {
+    expect(formatDayHeading("2026-10-18", today)).toBe("Sun 18 Oct");
+  });
+
+  it("adds the year when it isn't this year", () => {
+    expect(formatDayHeading("2025-10-18", today)).toBe("Sat 18 Oct 2025");
   });
 });
 

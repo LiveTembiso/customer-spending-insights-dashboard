@@ -1,36 +1,11 @@
 import { SectionCard } from "@/components/layout/section-card";
-import { CategoryDot } from "@/features/categories/components/category-dot";
 import { toDayKey } from "@/lib/dates";
-import { formatDay, formatRands } from "@/lib/format";
+import { formatDay } from "@/lib/format";
 
-import { merchantInitials } from "../merchant";
-import type { Transaction } from "../schemas";
 import { getCurrentRecentTransactions } from "../server/current";
+import { CategoryPill, debit, MerchantAvatar } from "./transaction-parts";
 
 const LIMIT = 5;
-
-const debit = (amount: number) => `−${formatRands(amount)}`;
-
-function MerchantAvatar({ transaction }: { transaction: Transaction }) {
-  return (
-    <span
-      aria-hidden
-      className="flex size-8 shrink-0 items-center justify-center rounded-[8px] text-xs font-bold text-navy"
-      style={{ backgroundColor: transaction.categoryColor }}
-    >
-      {merchantInitials(transaction.merchant)}
-    </span>
-  );
-}
-
-function CategoryPill({ transaction }: { transaction: Transaction }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-[13px] font-semibold">
-      <CategoryDot color={transaction.categoryColor} className="size-[9px]" />
-      {transaction.category}
-    </span>
-  );
-}
 
 export async function RecentTransactionsCard() {
   const response = await getCurrentRecentTransactions(LIMIT);
