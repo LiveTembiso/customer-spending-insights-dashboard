@@ -1,6 +1,5 @@
-import type { DayKey } from "./dates";
+import { addDays, type DayKey, dayOfWeek } from "./dates";
 
-// R4 250.75: en-ZA grouping with a decimal point rather than its decimal comma.
 const amount = new Intl.NumberFormat("en-ZA", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
@@ -64,6 +63,31 @@ export function formatDayRangeLong(start: DayKey, end: DayKey): string {
 export function formatDay(day: DayKey): string {
   const { day: date, month } = parts(day);
   return `${date} ${month.slice(0, 3)} ${day.slice(0, 4)}`;
+}
+
+/** "21 Sep - 20 Oct 2026", with both years when they differ. */
+export function formatDateRange(start: DayKey, end: DayKey): string {
+  if (start === end) return formatDay(end);
+  const from = parts(start);
+  const startYear = start.slice(0, 4);
+  const first =
+    startYear === end.slice(0, 4)
+      ? `${from.day} ${from.month.slice(0, 3)}`
+      : formatDay(start);
+  return `${first} – ${formatDay(end)}`;
+}
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/** "Today", "Yesterday", "Sun 18 Oct", or "Sun 18 Oct 2025" for another year. */
+export function formatDayHeading(day: DayKey, today: DayKey): string {
+  if (day === today) return "Today";
+  if (day === addDays(today, -1)) return "Yesterday";
+  const { day: date, month } = parts(day);
+  const label = `${WEEKDAYS[dayOfWeek(day)]} ${date} ${month.slice(0, 3)}`;
+  return day.slice(0, 4) === today.slice(0, 4)
+    ? label
+    : `${label} ${day.slice(0, 4)}`;
 }
 
 export function formatMonthShort(month: string): string {
