@@ -41,6 +41,9 @@ export function downloadCsv(
   const link = document.createElement("a");
   link.href = url;
   link.download = name;
+  document.body.append(link);
   link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  link.remove();
+  // Safari can still be reading the file just after the click.
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }

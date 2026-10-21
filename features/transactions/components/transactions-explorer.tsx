@@ -12,6 +12,7 @@ import type { DayKey } from "@/lib/dates";
 import { formatDateRange } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useToday } from "@/lib/use-today";
 
 import { transactionsQuery } from "../api";
 import {
@@ -69,8 +70,9 @@ interface TransactionsExplorerProps {
 
 export function TransactionsExplorer({
   customerId,
-  today,
+  today: serverToday,
 }: TransactionsExplorerProps) {
+  const today = useToday(serverToday);
   const searchParams = useSearchParams();
   const filters = useMemo(() => parseFilters(searchParams), [searchParams]);
   const range = filtersRange(filters, today);
@@ -84,12 +86,14 @@ export function TransactionsExplorer({
   const options = useQuery(filtersQuery(customerId));
   const goals = useQuery(goalsQuery(customerId));
 
-  // A selection belongs to the results it was picked from.
+  // A selection belongs to the results it was picked from, so new results
+  // clear it (and going Back to the old ones doesn't reopen it).
   const resultsKey = JSON.stringify(apiQuery);
   const [selection, setSelection] = useState<{
     resultsKey: string;
     transaction: Transaction;
   }>();
+  if (selection && selection.resultsKey !== resultsKey) setSelection(undefined);
   const selected =
     selection?.resultsKey === resultsKey ? selection.transaction : undefined;
   const select = (transaction: Transaction) =>
@@ -172,6 +176,7 @@ export function TransactionsExplorer({
             description={description}
             today={today}
             sortBy={filters.sortBy}
+            page={filters.page}
             response={transactions.data}
             stale={transactions.isPlaceholderData}
             failed={transactions.isError}

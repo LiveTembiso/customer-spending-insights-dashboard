@@ -105,20 +105,22 @@ function SearchField({
 }) {
   const [draft, setDraft] = useState(value ?? "");
   const [applied, setApplied] = useState(value);
+  const [sent, setSent] = useState(value);
 
   // The URL changed without typing (back button, Clear filters): follow it.
+  // Our own search arriving late is skipped, so it can't undo newer typing.
   if (value !== applied) {
     setApplied(value);
-    if (draft.trim() !== (value ?? "")) setDraft(value ?? "");
+    if (value !== sent && draft.trim() !== (value ?? "")) setDraft(value ?? "");
   }
 
   useEffect(() => {
     const next = draft.trim() || undefined;
     if (next === value) return;
-    const timer = setTimeout(
-      () => onChange({ q: next }, { replace: true }),
-      SEARCH_DELAY_MS,
-    );
+    const timer = setTimeout(() => {
+      setSent(next);
+      onChange({ q: next }, { replace: true });
+    }, SEARCH_DELAY_MS);
     return () => clearTimeout(timer);
   }, [draft, value, onChange]);
 
@@ -128,7 +130,9 @@ function SearchField({
       className="flex min-w-[min(100%,14rem)] flex-1 flex-col gap-1.5"
       onSubmit={(event) => {
         event.preventDefault();
-        onChange({ q: draft.trim() || undefined }, { replace: true });
+        const next = draft.trim() || undefined;
+        setSent(next);
+        onChange({ q: next }, { replace: true });
       }}
     >
       <label htmlFor="transaction-search" className={fieldLabel}>

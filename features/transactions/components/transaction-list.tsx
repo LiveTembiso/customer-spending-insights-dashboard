@@ -27,6 +27,7 @@ interface TransactionListProps {
   description: string;
   today: DayKey;
   sortBy: SortBy;
+  page: number;
   response?: TransactionsResponse;
   /** The response is for the previous filters while new ones load. */
   stale: boolean;
@@ -80,6 +81,7 @@ export function TransactionList(props: TransactionListProps) {
 
       {response && response.pagination.total > PAGE_SIZE && (
         <Pagination
+          page={props.page}
           pagination={response.pagination}
           shown={response.transactions.length}
           onPageChange={changePage}
@@ -250,13 +252,6 @@ function TransactionItems({
   onSelect,
 }: RowsProps) {
   const byDate = sortBy === "date_desc" || sortBy === "date_asc";
-  const groups: { day: DayKey; items: Transaction[] }[] = [];
-  for (const transaction of transactions) {
-    const day = toDayKey(new Date(transaction.date));
-    const last = groups.at(-1);
-    if (byDate && last?.day === day) last.items.push(transaction);
-    else groups.push({ day, items: [transaction] });
-  }
 
   const item = (transaction: Transaction) => {
     const date = new Date(transaction.date);
@@ -297,6 +292,14 @@ function TransactionItems({
     );
   }
 
+  const groups: { day: DayKey; items: Transaction[] }[] = [];
+  for (const transaction of transactions) {
+    const day = toDayKey(new Date(transaction.date));
+    const last = groups.at(-1);
+    if (last?.day === day) last.items.push(transaction);
+    else groups.push({ day, items: [transaction] });
+  }
+
   return (
     <div className="flex flex-col lg:hidden">
       {groups.map((group, index) => (
@@ -316,18 +319,21 @@ function TransactionItems({
   );
 }
 
+// `page` comes from the URL, so quick clicks step on from the page asked for,
+// not from the one still on screen while it loads.
 function Pagination({
+  page,
   pagination,
   shown,
   onPageChange,
 }: {
+  page: number;
   pagination: PaginationData;
   shown: number;
   onPageChange: (page: number) => void;
 }) {
   const { offset, total } = pagination;
   const pages = Math.ceil(total / PAGE_SIZE);
-  const page = Math.min(Math.floor(offset / PAGE_SIZE) + 1, pages);
   const button =
     "flex min-h-11 items-center gap-1 rounded-[10px] border text-sm disabled:border-border disabled:bg-muted disabled:font-semibold disabled:text-muted-foreground";
 
@@ -345,7 +351,7 @@ function Pagination({
         <button
           type="button"
           disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
+          onClick={() => onPageChange(Math.min(page - 1, pages))}
           className={cn(button, "border-navy bg-card pr-3.5 pl-2.5 font-bold")}
         >
           <ChevronLeft aria-hidden className="size-4" />

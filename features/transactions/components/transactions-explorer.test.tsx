@@ -241,6 +241,19 @@ describe("TransactionsExplorer search", () => {
     expect(replaceState).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps typing that lands before its own search reaches the URL", async () => {
+    const replaceState = vi.spyOn(window.history, "replaceState");
+    const { navigateTo } = renderExplorer("");
+    const box = screen.getByRole("searchbox");
+    await userEvent.type(box, "woolw");
+    await waitFor(() =>
+      expect(replaceState).toHaveBeenCalledWith(null, "", "?q=woolw"),
+    );
+    await userEvent.type(box, "o");
+    navigateTo("q=woolw");
+    expect(box).toHaveValue("woolwo");
+  });
+
   it("drops a half-typed search when filters are cleared", async () => {
     const replaceState = vi.spyOn(window.history, "replaceState");
     renderExplorer("category=Groceries");
@@ -304,9 +317,9 @@ describe("TransactionsExplorer pages", () => {
   it("steps back from a page past the end to the last real one", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("page=9", [], { total: 25 });
-    expect(screen.getByText("Page 3 of 3")).toBeInTheDocument();
+    expect(screen.getByText("Page 9 of 3")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: /Previous/ }));
-    expect(pushState).toHaveBeenCalledWith(null, "", "?page=2");
+    expect(pushState).toHaveBeenCalledWith(null, "", "?page=3");
   });
 });
 
@@ -338,6 +351,16 @@ describe("TransactionsExplorer details beside the list", () => {
     expect(
       screen.getAllByRole("button", { name: /Pick n Pay/ })[0],
     ).toHaveFocus();
+  });
+
+  it("stays closed when Back returns to the earlier results", async () => {
+    const { navigateTo } = renderExplorer("");
+    await openDetails();
+    navigateTo("category=Utilities");
+    navigateTo("");
+    expect(
+      screen.queryByRole("complementary", { name: "Transaction details" }),
+    ).not.toBeInTheDocument();
   });
 
   it("closes when the filters change", async () => {
