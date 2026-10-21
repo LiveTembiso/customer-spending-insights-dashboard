@@ -1,23 +1,17 @@
 import "server-only";
 
 import { addDays, type DayKey, toDayKey } from "@/lib/dates";
+import {
+  type DayRange,
+  PERIOD_DAYS,
+  periodRange as periodRangeEnding,
+} from "@/lib/periods";
 import type { Period } from "@/lib/schemas";
 
-export interface DayRange {
-  start: DayKey;
-  end: DayKey;
-}
-
-const PERIOD_DAYS: Record<Period, number> = {
-  "7d": 7,
-  "30d": 30,
-  "90d": 90,
-  "1y": 365,
-};
+export type { DayRange };
 
 export function periodRange(period: Period, now: Date): DayRange {
-  const end = toDayKey(now);
-  return { start: addDays(end, 1 - PERIOD_DAYS[period]), end };
+  return periodRangeEnding(period, toDayKey(now));
 }
 
 export function previousPeriodRange(period: Period, now: Date): DayRange {
