@@ -4,9 +4,9 @@ import type { CategoryName } from "@/features/categories/schemas";
 import { inMonth, totalCents } from "@/features/transactions/server/records";
 import { getCustomerTransactions } from "@/features/transactions/server/store";
 import { dayOfMonth, daysInMonth, toDayKey, toMonthKey } from "@/lib/dates";
-import { roundTo, toRands } from "@/lib/money";
+import { type Cents, roundTo, toRands } from "@/lib/money";
 
-import { monthElapsedPercent } from "../pace";
+import { isAheadOfPace, monthElapsedPercent } from "../pace";
 import type { GoalStatus, GoalsResponse } from "../schemas";
 
 interface Budget {
@@ -24,17 +24,22 @@ const BUDGETS: Record<string, readonly Budget[]> = {
 };
 
 const WARNING_THRESHOLD = 90;
-const PACE_TOLERANCE = 10;
+
+/** Share of the budget used, to one decimal, as the API reports it. */
+export function percentUsed(spent: Cents, monthlyBudget: number): number {
+  return roundTo((toRands(spent) / monthlyBudget) * 100, 1);
+}
 
 export function goalStatus(
-  percentageUsed: number,
+  spent: Cents,
+  monthlyBudget: number,
   monthElapsed: number,
 ): GoalStatus {
-  if (percentageUsed > 100) return "exceeded";
-  if (
-    percentageUsed >= WARNING_THRESHOLD ||
-    percentageUsed > monthElapsed + PACE_TOLERANCE
-  ) {
+  // A cent over is over, even though it still shows as 100.0%.
+  if (spent > monthlyBudget * 100) return "exceeded";
+  // Otherwise the rounded figure decides, so 89.96% shown as 90% isn't "On track".
+  const used = percentUsed(spent, monthlyBudget);
+  if (used >= WARNING_THRESHOLD || isAheadOfPace(used, monthElapsed)) {
     return "warning";
   }
   return "on_track";
@@ -59,17 +64,14 @@ export function getGoals(
       const spent = totalCents(
         thisMonth.filter((record) => record.category === budget.category),
       );
-      // Status uses the exact ratio; only the reported value is rounded.
-      const used = (toRands(spent) / budget.monthlyBudget) * 100;
-
       return {
         id: budget.id,
         category: budget.category,
         monthlyBudget: budget.monthlyBudget,
         currentSpent: toRands(spent),
-        percentageUsed: roundTo(used, 1),
+        percentageUsed: percentUsed(spent, budget.monthlyBudget),
         daysRemaining,
-        status: goalStatus(used, monthElapsed),
+        status: goalStatus(spent, budget.monthlyBudget, monthElapsed),
       };
     }),
   };

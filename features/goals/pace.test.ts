@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { byUrgency, goalPace, monthElapsedPercent } from "./pace";
+import {
+  byUrgency,
+  goalPace,
+  isAheadOfPace,
+  monthElapsedPercent,
+} from "./pace";
 import type { Goal } from "./schemas";
 
 const goal = (overrides: Partial<Goal>): Goal => ({
@@ -18,6 +23,13 @@ describe("monthElapsedPercent", () => {
   it("starts the month at midnight in SAST", () => {
     // 1 Oct 00:00 SAST is 30 Sep 22:00 UTC.
     expect(monthElapsedPercent(new Date("2026-09-30T22:00:00Z"))).toBe(0);
+  });
+
+  it("stays under 100 at the last instant of the month", () => {
+    // 31 Oct 23:59:59.999 SAST.
+    const elapsed = monthElapsedPercent(new Date("2026-10-31T21:59:59.999Z"));
+    expect(elapsed).toBeLessThan(100);
+    expect(elapsed).toBeGreaterThan(99.99);
   });
 
   it("counts part of today", () => {
@@ -42,8 +54,20 @@ describe("goalPace", () => {
     });
   });
 
+  it("has no daily allowance when it would be under a cent", () => {
+    expect(goalPace(goal({ currentSpent: 999.95 })).perDay).toBeNull();
+    expect(goalPace(goal({ currentSpent: 999.9 })).perDay).toBe(0.01);
+  });
+
   it("has no daily allowance once the budget is used exactly", () => {
     expect(goalPace(goal({ currentSpent: 1000 })).perDay).toBeNull();
+  });
+});
+
+describe("isAheadOfPace", () => {
+  it("allows ten points ahead of the month before it counts", () => {
+    expect(isAheadOfPace(60, 50)).toBe(false);
+    expect(isAheadOfPace(60.1, 50)).toBe(true);
   });
 });
 

@@ -11,6 +11,16 @@ export function monthElapsedPercent(now: Date): number {
   return ((now.getTime() - start) / (daysInMonth(month) * DAY_MS)) * 100;
 }
 
+const PACE_TOLERANCE = 10;
+
+/** Used noticeably more of the budget than of the month. */
+export function isAheadOfPace(
+  percentageUsed: number,
+  monthElapsed: number,
+): boolean {
+  return percentageUsed > monthElapsed + PACE_TOLERANCE;
+}
+
 export interface GoalPace {
   left: number;
   over: number;
@@ -19,12 +29,16 @@ export interface GoalPace {
 }
 
 export function goalPace(goal: Goal): GoalPace {
-  const left = Math.max(goal.monthlyBudget - goal.currentSpent, 0);
+  // In whole cents, so float noise can't decide whether anything is left.
+  const balance = Math.round((goal.monthlyBudget - goal.currentSpent) * 100);
+  const leftCents = Math.max(balance, 0);
+  const centsPerDay =
+    goal.daysRemaining > 0 ? leftCents / goal.daysRemaining : 0;
   return {
-    left,
-    over: Math.max(goal.currentSpent - goal.monthlyBudget, 0),
-    perDay:
-      left > 0 && goal.daysRemaining > 0 ? left / goal.daysRemaining : null,
+    left: leftCents / 100,
+    over: Math.max(-balance, 0) / 100,
+    // Under a cent a day is nothing to spend.
+    perDay: centsPerDay >= 1 ? centsPerDay / 100 : null,
   };
 }
 
