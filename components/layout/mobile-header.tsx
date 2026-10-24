@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Logo } from "./logo";
+import { LogoCompact } from "./logo";
 
 export function MobileHeader({ account }: { account: ReactNode }) {
   return (
@@ -10,7 +10,7 @@ export function MobileHeader({ account }: { account: ReactNode }) {
         href="/"
         className="-mx-1 rounded-[10px] px-1 outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Logo />
+        <LogoCompact />
       </Link>
       {account}
     </header>

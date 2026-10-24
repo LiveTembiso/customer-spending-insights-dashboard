@@ -2,10 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Goal } from "../schemas";
-import { getCurrentGoals } from "../server/current";
+import { getCurrentGoalsProgress } from "../server/current";
 import { GoalsCard } from "./goals-card";
 
-vi.mock("../server/current", () => ({ getCurrentGoals: vi.fn() }));
+vi.mock("../server/current", () => ({ getCurrentGoalsProgress: vi.fn() }));
 
 const goal = (overrides: Partial<Goal>): Goal => ({
   id: "goal_001",
@@ -19,7 +19,11 @@ const goal = (overrides: Partial<Goal>): Goal => ({
 });
 
 async function renderCard(goals: Goal[]) {
-  vi.mocked(getCurrentGoals).mockResolvedValue({ goals });
+  vi.mocked(getCurrentGoalsProgress).mockResolvedValue({
+    goals,
+    monthElapsed: 50,
+    today: "2026-10-16",
+  });
   render(await GoalsCard());
 }
 
@@ -29,7 +33,7 @@ describe("GoalsCard", () => {
 
     expect(screen.getByText("On track")).toBeInTheDocument();
     expect(
-      screen.getByText(/R500\.00 of R1\s000\.00 · 10 days left/),
+      screen.getByText(/R500\.00 of R1\s000 · 10 days left/),
     ).toBeInTheDocument();
   });
 
@@ -38,7 +42,7 @@ describe("GoalsCard", () => {
       goal({ currentSpent: 1120, percentageUsed: 112, status: "exceeded" }),
     ]);
     const bar = screen.getByRole("img", {
-      name: "112 percent of the Groceries budget used",
+      name: /^112 percent of the groceries budget used/,
     });
 
     expect(screen.getByText("Over budget")).toBeInTheDocument();
