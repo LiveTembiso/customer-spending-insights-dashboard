@@ -7,6 +7,10 @@ export function axisMax(largest: number): number {
   return 10 * step;
 }
 
+/** Fill for the current month's bar: it isn't finished yet. */
+export const STRIPES =
+  "repeating-linear-gradient(135deg, var(--primary) 0 3px, var(--card) 3px 7px)";
+
 interface Slice {
   color: string;
   amount: number;

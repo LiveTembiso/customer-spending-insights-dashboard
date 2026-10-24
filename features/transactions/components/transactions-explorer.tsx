@@ -10,6 +10,7 @@ import { goalsQuery } from "@/features/goals/api";
 import { categoriesQuery } from "@/features/spending/api";
 import type { DayKey } from "@/lib/dates";
 import { formatDateRange } from "@/lib/format";
+import { navigate } from "@/lib/history";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { useToday } from "@/lib/use-today";
@@ -45,13 +46,6 @@ const DETAILS_ID = "transaction-details";
 
 // The details panel fits beside the table from here; below, it's a dialog.
 const WIDE = "(min-width: 1360px)";
-
-function navigate(search: URLSearchParams, replace: boolean) {
-  const query = search.toString();
-  const url = query ? `?${query}` : window.location.pathname;
-  if (replace) window.history.replaceState(null, "", url);
-  else window.history.pushState(null, "", url);
-}
 
 function focusRow(id: string) {
   const target = [
