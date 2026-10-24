@@ -1,13 +1,10 @@
 import { SectionCard } from "@/components/layout/section-card";
 import { formatMonthLong, formatMonthShort, formatRands } from "@/lib/format";
 
-import { axisMax } from "../charts";
+import { axisMax, STRIPES } from "../charts";
 import { getCurrentTrends } from "../server/current";
 
 const MONTHS = 6;
-
-const STRIPES =
-  "repeating-linear-gradient(135deg, var(--primary) 0 3px, var(--card) 3px 7px)";
 
 export async function MonthlyTrendCard() {
   const response = await getCurrentTrends(MONTHS);

@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { PageHeader } from "@/components/layout/page-header";
+import {
+  InsightsPage as InsightsContent,
+  InsightsPageSkeleton,
+} from "@/features/spending/components/insights-page";
 
 export const metadata: Metadata = { title: "Insights" };
 
-export default function InsightsPage() {
+export default function InsightsPage({ searchParams }: PageProps<"/insights">) {
   return (
-    <PageHeader eyebrow="How your spending is changing" title="Insights" />
+    <Suspense fallback={<InsightsPageSkeleton />}>
+      <InsightsContent searchParams={searchParams} />
+    </Suspense>
   );
 }

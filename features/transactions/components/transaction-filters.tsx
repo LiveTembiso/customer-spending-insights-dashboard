@@ -3,11 +3,12 @@
 import { CalendarDays, Search, X } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
+import { NativeSelect } from "@/components/ui/native-select";
 import { CategoryDot } from "@/features/categories/components/category-dot";
 import type { FiltersResponse } from "@/features/categories/schemas";
 import type { DayKey } from "@/lib/dates";
 import { formatDay } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { cn, pressedInForcedColors } from "@/lib/utils";
 
 import {
   EARLIEST_DAY,
@@ -33,10 +34,6 @@ interface TransactionFiltersPanelProps {
   /** Changes on every reset, so a half-typed search is dropped too. */
   resetCount: number;
 }
-
-// Forced-colours mode drops backgrounds, so pressed controls need system colours.
-const pressedInForcedColors =
-  "forced-color-adjust-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]";
 
 const fieldLabel = "text-xs font-semibold text-muted-foreground";
 const control =
@@ -325,18 +322,17 @@ function SortField({
       <label htmlFor="transaction-sort" className={fieldLabel}>
         Sort by
       </label>
-      <select
+      <NativeSelect
         id="transaction-sort"
         value={value}
         onChange={(event) => onChange({ sortBy: event.target.value as SortBy })}
-        className={control}
       >
         {SORT_OPTIONS.map((option) => (
           <option key={option} value={option}>
             {SORT_LABELS[option]}
           </option>
         ))}
-      </select>
+      </NativeSelect>
     </div>
   );
 }
