@@ -117,7 +117,6 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
       }),
     );
 
-  // Goals and trends only add to the notes, so a failure doesn't hold them up.
   const settled = (query: { isSuccess: boolean; isError: boolean }) =>
     query.isSuccess || query.isError;
   const notes =
@@ -157,11 +156,10 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
           <InsightsSummary
             period={period}
             summary={summary.data}
-            // Only when both are for the same period.
             categories={
-              categories.isPlaceholderData === summary.isPlaceholderData
-                ? categories.data
-                : undefined
+              categories.isPlaceholderData || summary.isPlaceholderData
+                ? undefined
+                : categories.data
             }
             stale={summary.isPlaceholderData}
           />

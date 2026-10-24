@@ -317,6 +317,17 @@ describe("InsightsExplorer", () => {
     expect(text(table)).toContain("No average to compare with");
   });
 
+  it("says so when there are no months to show", () => {
+    renderExplorer("", { summary, categories, trends: { trends: [] } });
+    for (const name of ["Monthly spending", "Month by month"]) {
+      expect(
+        within(screen.getByRole("region", { name })).getByText(
+          "No spending yet.",
+        ),
+      ).toBeInTheDocument();
+    }
+  });
+
   it("dims the old figures and drops their dates while a new period loads", async () => {
     vi.stubGlobal(
       "fetch",
@@ -333,6 +344,7 @@ describe("InsightsExplorer", () => {
         name: "Compared with the previous 90 days",
       }),
     ).toHaveAttribute("aria-busy", "true");
+    expect(screen.queryByText(/of spend$/)).not.toBeInTheDocument();
     const breakdown = screen.getByRole("region", {
       name: "Category breakdown",
     });

@@ -55,10 +55,14 @@ export function MonthTableCard({
   trends?: MonthlyTrend[];
   stale?: boolean;
 }) {
-  if (!trends) {
+  if (!trends || trends.length === 0) {
     return (
       <SectionCard id="month-table-title" title="Month by month">
-        <Skeleton className="h-60 w-full" />
+        {trends ? (
+          <p className="text-sm text-muted-foreground">No spending yet.</p>
+        ) : (
+          <Skeleton className="h-60 w-full" />
+        )}
       </SectionCard>
     );
   }
@@ -121,7 +125,7 @@ export function MonthTableCard({
 
         <div
           role="region"
-          aria-labelledby="month-table-title"
+          aria-label="Month by month table, scrollable"
           tabIndex={0}
           className="hidden overflow-x-auto lg:block"
         >

@@ -30,7 +30,6 @@ const GAPS: Record<MonthChoice, string> = {
   24: "gap-0.5 sm:gap-1.5",
 };
 
-// The previous months stay up while new ones load, so lay out by what's there.
 const layoutFor = (count: number): MonthChoice =>
   MONTH_CHOICES.find((choice) => count <= choice) ?? 24;
 
