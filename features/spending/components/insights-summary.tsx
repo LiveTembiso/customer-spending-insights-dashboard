@@ -27,13 +27,12 @@ function Change({
   change,
   words,
   previous,
-  rising,
+  colors,
 }: {
   change: number | null;
   words: [more: string, fewer: string];
   previous: string;
-  /** Colour for an increase; decreases are always the primary blue. */
-  rising: string;
+  colors: [rising: string, falling: string];
 }) {
   if (change === null) {
     return (
@@ -55,7 +54,7 @@ function Change({
       className={cn(
         note,
         "inline-flex items-center gap-1 font-bold",
-        change > 0 ? rising : "text-primary",
+        change > 0 ? colors[0] : colors[1],
       )}
     >
       <Icon aria-hidden className="size-3.5 shrink-0" strokeWidth={2.5} />
@@ -101,7 +100,7 @@ export function InsightsSummary({
           change={spentChange}
           words={["more", "less"]}
           previous={PREVIOUS[period]}
-          rising="text-warning-foreground"
+          colors={["text-warning-foreground", "text-primary"]}
         />
       </div>
       <div className={tile}>
@@ -111,7 +110,7 @@ export function InsightsSummary({
           change={transactionChange}
           words={["more", "fewer"]}
           previous={PREVIOUS[period]}
-          rising="text-muted-strong"
+          colors={["text-muted-strong", "text-muted-strong"]}
         />
       </div>
       <div

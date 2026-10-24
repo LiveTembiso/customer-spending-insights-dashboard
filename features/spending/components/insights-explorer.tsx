@@ -108,20 +108,29 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
   });
   const goals = useQuery(goalsQuery(customerId));
 
+  // Read the URL itself: two quick changes can land before a re-render.
   const update = (change: Partial<InsightsView>) =>
-    navigate(toSearchParams({ ...view, ...change }));
+    navigate(
+      toSearchParams({
+        ...parseView(new URLSearchParams(window.location.search)),
+        ...change,
+      }),
+    );
 
-  // Goals only add context to a note, so the notes don't wait on them.
-  const goalsSettled = goals.isSuccess || goals.isError;
+  // Goals and trends only add to the notes, so a failure doesn't hold them up.
+  const settled = (query: { isSuccess: boolean; isError: boolean }) =>
+    query.isSuccess || query.isError;
   const notes =
-    categories.data && trends.data && goalsSettled
+    categories.data && settled(trends) && settled(goals)
       ? standOut(
           categories.data.categories,
           goals.data?.goals ?? [],
-          trends.data.trends,
+          trends.data?.trends ?? [],
         )
       : undefined;
-  const range = categories.data?.dateRange;
+  const range = categories.isPlaceholderData
+    ? undefined
+    : categories.data?.dateRange;
   const periodDescription = range
     ? `${LAST[period]} · ${formatDateRange(range.startDate, range.endDate)}`
     : LAST[period];
@@ -148,7 +157,12 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
           <InsightsSummary
             period={period}
             summary={summary.data}
-            categories={categories.data}
+            // Only when both are for the same period.
+            categories={
+              categories.isPlaceholderData === summary.isPlaceholderData
+                ? categories.data
+                : undefined
+            }
             stale={summary.isPlaceholderData}
           />
         )}
@@ -182,6 +196,7 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
             />
             <StandOutCard
               notes={notes}
+              stale={categories.isPlaceholderData || trends.isPlaceholderData}
               description={`Based on the ${LAST[period].toLowerCase()} and your recent months`}
             />
           </div>

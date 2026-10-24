@@ -82,37 +82,66 @@ const goal: Goal = {
 
 const text = (element: HTMLElement) => element.textContent?.replace(/\s/g, " ");
 
-function renderExplorer(search = "", { failSummary = false } = {}) {
+function setUrl(search: string) {
+  window.history.replaceState(null, "", search ? `?${search}` : "/");
   const params = new URLSearchParams(search);
   vi.mocked(useSearchParams).mockReturnValue(
     params as unknown as ReadonlyURLSearchParams,
   );
-  const { period, months } = parseView(params);
+  return parseView(params);
+}
+
+/** Data left out isn't cached, so the explorer fetches it (stub `fetch` first). */
+function renderExplorer(
+  search = "",
+  data: {
+    summary?: SummaryResponse;
+    categories?: CategoriesResponse;
+    trends?: TrendsResponse;
+  } = { summary, categories, trends },
+) {
+  const { period, months } = setUrl(search);
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   });
-  if (!failSummary) {
-    client.setQueryData(summaryQuery(CUSTOMER, { period }).queryKey, summary);
+  if (data.summary) {
+    client.setQueryData(
+      summaryQuery(CUSTOMER, { period }).queryKey,
+      data.summary,
+    );
   }
-  client.setQueryData(
-    categoriesQuery(CUSTOMER, { period }).queryKey,
-    categories,
-  );
-  client.setQueryData(trendsQuery(CUSTOMER, { months }).queryKey, trends);
+  if (data.categories) {
+    client.setQueryData(
+      categoriesQuery(CUSTOMER, { period }).queryKey,
+      data.categories,
+    );
+  }
+  if (data.trends) {
+    client.setQueryData(
+      trendsQuery(CUSTOMER, { months }).queryKey,
+      data.trends,
+    );
+  }
   client.setQueryData(goalsQuery(CUSTOMER).queryKey, { goals: [goal] });
 
-  return render(
-    <QueryClientProvider client={client}>
-      <InsightsExplorer customerId={CUSTOMER} />
-    </QueryClientProvider>,
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
   );
+  return render(<InsightsExplorer customerId={CUSTOMER} />, { wrapper });
 }
 
+const failingFetch = () =>
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(null, { status: 500 })),
+  );
+
 beforeEach(() => {
-  vi.spyOn(window.history, "pushState").mockImplementation(() => {});
+  vi.spyOn(window.history, "pushState");
 });
 
 afterEach(() => {
+  window.history.replaceState(null, "", "/");
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -166,11 +195,12 @@ describe("InsightsExplorer", () => {
       "",
       "?period=7d&metric=count",
     );
+    // The page hasn't re-rendered with the new URL, and must not lose it.
     await userEvent.selectOptions(screen.getByLabelText("Months"), "24");
     expect(window.history.pushState).toHaveBeenLastCalledWith(
       null,
       "",
-      "?period=7d&months=24",
+      "?period=7d&months=24&metric=count",
     );
   });
 
@@ -212,14 +242,106 @@ describe("InsightsExplorer", () => {
   });
 
   it("offers a retry when the summary can't load", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response(null, { status: 500 })),
-    );
-    renderExplorer("", { failSummary: true });
+    failingFetch();
+    renderExplorer("", { categories, trends });
     expect(
       await screen.findByText("We couldn't load your spending summary."),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+  });
+
+  it("still points things out when the monthly figures can't load", async () => {
+    failingFetch();
+    renderExplorer("", { summary, categories });
+    expect(
+      await screen.findByText("We couldn't load your monthly spending."),
+    ).toBeInTheDocument();
+    const notes = screen.getByRole("region", { name: "What stands out" });
+    expect(
+      within(notes).getByRole("heading", {
+        name: "Groceries is your biggest category",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Month by month" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("says when nothing was spent and there's nothing to compare with", () => {
+    renderExplorer("", {
+      summary: {
+        ...summary,
+        totalSpent: 0,
+        transactionCount: 0,
+        topCategory: null,
+        comparedToPrevious: { spentChange: null, transactionChange: 0 },
+      },
+      categories,
+      trends,
+    });
+    const tiles = screen.getByRole("region", {
+      name: "Compared with the previous 30 days",
+    });
+    expect(text(tiles)).toContain("Nothing to compare with");
+    expect(text(tiles)).toContain("Same as the previous 30 days");
+    expect(text(tiles)).toContain("No spending yet");
+  });
+
+  it("keeps a change in transaction count neutral either way", () => {
+    renderExplorer();
+    const fewer = screen.getByText(/3\.2% fewer/);
+    expect(fewer).toHaveClass("text-muted-strong");
+    expect(screen.getByText(/12\.5% more/)).toHaveClass(
+      "text-warning-foreground",
+    );
+  });
+
+  it("tells finished months apart from the current one without an average", () => {
+    renderExplorer("", {
+      summary,
+      categories,
+      trends: {
+        trends: trends.trends.map((trend, index) =>
+          index < 5
+            ? {
+                ...trend,
+                totalSpent: 0,
+                transactionCount: 0,
+                averageTransaction: 0,
+              }
+            : trend,
+        ),
+      },
+    });
+    const table = screen.getByRole("table", { name: "Month by month" });
+    expect(text(table)).toContain("No average to compare with");
+  });
+
+  it("dims the old figures and drops their dates while a new period loads", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => new Promise<Response>(() => {})),
+    );
+    const { rerender } = renderExplorer();
+
+    await userEvent.click(screen.getByRole("button", { name: "90 days" }));
+    setUrl(window.location.search.slice(1));
+    rerender(<InsightsExplorer customerId={CUSTOMER} />);
+
+    expect(
+      screen.getByRole("region", {
+        name: "Compared with the previous 90 days",
+      }),
+    ).toHaveAttribute("aria-busy", "true");
+    const breakdown = screen.getByRole("region", {
+      name: "Category breakdown",
+    });
+    expect(text(breakdown)).toContain("Last 90 days · largest first");
+    expect(text(breakdown)).not.toContain("25 Sep");
+    expect(
+      within(screen.getByRole("region", { name: "What stands out" })).getByRole(
+        "list",
+      ),
+    ).toHaveAttribute("aria-busy", "true");
   });
 });

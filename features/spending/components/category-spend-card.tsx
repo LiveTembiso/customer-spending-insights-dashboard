@@ -6,10 +6,8 @@ import { roundTo } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 import { donutGradient } from "../charts";
+import { purchases } from "../labels";
 import type { CategoriesResponse } from "../schemas";
-
-const purchases = (count: number) =>
-  count === 1 ? "1 purchase" : `${count} purchases`;
 
 const averageOf = (amount: number, count: number) =>
   count === 0 ? 0 : roundTo(amount / count, 2);
@@ -152,7 +150,10 @@ export function CategorySpendCard({
                       </span>
                     </th>
                     <td className="px-2 py-2.5 text-right font-bold">
-                      {formatRands(category.amount)}
+                      {formatRands(category.amount)}{" "}
+                      <span className="sr-only">
+                        ({category.percentage.toFixed(1)}% of spending)
+                      </span>
                     </td>
                     <td className="px-2 py-2.5 text-right">
                       {category.transactionCount}

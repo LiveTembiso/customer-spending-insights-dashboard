@@ -1,20 +1,26 @@
 import { SectionCard } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatMonthShort, formatRands } from "@/lib/format";
+import { formatRands } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { monthStats, vsAverage } from "../insights";
+import { monthYear, transactions } from "../labels";
 import type { MonthlyTrend } from "../schemas";
 
-const monthYear = (month: string) =>
-  `${formatMonthShort(month)} ${month.slice(0, 4)}`;
-
-function VsAverage({ change }: { change: number | null }) {
+function VsAverage({
+  change,
+  isCurrent,
+}: {
+  change: number | null;
+  isCurrent: boolean;
+}) {
   if (change === null) {
     return (
       <>
         <span aria-hidden>—</span>
-        <span className="sr-only">Month not finished</span>
+        <span className="sr-only">
+          {isCurrent ? "Month not finished" : "No average to compare with"}
+        </span>
       </>
     );
   }
@@ -24,7 +30,9 @@ function VsAverage({ change }: { change: number | null }) {
       className={cn(
         change > 0
           ? "font-bold text-warning-foreground"
-          : "text-muted-foreground",
+          : change < 0
+            ? "text-primary"
+            : "text-muted-foreground",
       )}
     >
       <span aria-hidden>
@@ -72,7 +80,7 @@ export function MonthTableCard({
         aria-busy={stale || undefined}
         className={cn("transition-opacity", stale && "opacity-60")}
       >
-        <ul className="flex flex-col tabular-nums sm:hidden">
+        <ul className="flex flex-col tabular-nums lg:hidden">
           {rows.map(({ trend, isCurrent, change }) => (
             <li
               key={trend.month}
@@ -89,7 +97,7 @@ export function MonthTableCard({
                   )}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {trend.transactionCount} transactions · avg{" "}
+                  {transactions(trend.transactionCount)} · avg{" "}
                   {formatRands(trend.averageTransaction)}
                 </span>
               </span>
@@ -99,7 +107,7 @@ export function MonthTableCard({
                 </span>
                 {change !== null && (
                   <span className="text-xs">
-                    <VsAverage change={change} />
+                    <VsAverage change={change} isCurrent={isCurrent} />
                     <span aria-hidden className="text-muted-foreground">
                       {" "}
                       vs avg
@@ -111,7 +119,12 @@ export function MonthTableCard({
           ))}
         </ul>
 
-        <div className="hidden overflow-x-auto sm:block">
+        <div
+          role="region"
+          aria-labelledby="month-table-title"
+          tabIndex={0}
+          className="hidden overflow-x-auto lg:block"
+        >
           <table
             aria-labelledby="month-table-title"
             className="w-full min-w-[620px] border-collapse text-sm"
@@ -169,7 +182,7 @@ export function MonthTableCard({
                     {formatRands(trend.totalSpent)}
                   </td>
                   <td className="p-3 text-right">
-                    <VsAverage change={change} />
+                    <VsAverage change={change} isCurrent={isCurrent} />
                   </td>
                   <td className="p-3 text-right">{trend.transactionCount}</td>
                   <td className="p-3 text-right">

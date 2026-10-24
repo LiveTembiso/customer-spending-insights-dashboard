@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 import { axisMax, STRIPES } from "../charts";
 import { formatMetric, metricValue, monthStats } from "../insights";
+import { monthYear } from "../labels";
 import type { MonthlyTrend } from "../schemas";
 import {
   METRIC_LABELS,
@@ -29,8 +30,9 @@ const GAPS: Record<MonthChoice, string> = {
   24: "gap-0.5 sm:gap-1.5",
 };
 
-const monthYear = (month: string) =>
-  `${formatMonthShort(month)} ${month.slice(0, 4)}`;
+// The previous months stay up while new ones load, so lay out by what's there.
+const layoutFor = (count: number): MonthChoice =>
+  MONTH_CHOICES.find((choice) => count <= choice) ?? 24;
 
 interface SpendingChartCardProps {
   trends?: MonthlyTrend[];
@@ -57,7 +59,9 @@ export function SpendingChartCard({
           <h2 id={TITLE_ID} className="text-lg font-bold">
             Monthly spending
           </h2>
-          {trends && <Description trends={trends} metric={metric} />}
+          {trends && trends.length > 0 && (
+            <Description trends={trends} metric={metric} />
+          )}
         </div>
         <div className="flex flex-wrap items-end gap-2.5">
           <div className="flex flex-col gap-1">
@@ -104,12 +108,13 @@ export function SpendingChartCard({
           </div>
         </div>
       </div>
-      {trends ? (
+      {trends?.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No spending yet.</p>
+      ) : trends ? (
         <Chart
           trends={trends}
           metric={metric}
-          // While new months load, the previous ones stay up, dimmed.
-          months={trends.length as MonthChoice}
+          months={layoutFor(trends.length)}
           stale={stale}
         />
       ) : (
@@ -223,7 +228,7 @@ function Chart({
                     ? "border-2 border-b-0 border-primary"
                     : isHighest
                       ? "bg-primary"
-                      : "bg-bar-muted",
+                      : "bg-bar-muted inset-ring inset-ring-bar-muted-edge",
                 )}
                 style={{
                   height: `${(value / top) * 100}%`,
@@ -234,7 +239,7 @@ function Chart({
                   <span
                     aria-hidden
                     className={cn(
-                      "absolute -inset-x-1 bottom-full pb-1.5 text-center text-[11px] tabular-nums sm:text-xs",
+                      "absolute -inset-x-1 bottom-full z-10 pb-1.5 text-center text-[11px] tabular-nums sm:text-xs",
                       isHighest
                         ? "font-extrabold text-foreground"
                         : "text-muted-foreground",

@@ -35,6 +35,7 @@ test.describe("insights", () => {
     ).toBeVisible();
 
     await page.getByLabel("Show", { exact: true }).selectOption("count");
+    await expect(page).toHaveURL(/metric=count/);
     await page.getByLabel("Months", { exact: true }).selectOption("12");
     await expect(page).toHaveURL(/\?period=90d&months=12&metric=count$/);
     await expect(

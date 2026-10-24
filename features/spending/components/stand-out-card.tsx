@@ -1,4 +1,9 @@
-import { TrendingDown, TrendingUp, TriangleAlert } from "lucide-react";
+import {
+  MoveRight,
+  TrendingDown,
+  TrendingUp,
+  TriangleAlert,
+} from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -9,9 +14,7 @@ import { formatMonthLong, formatRands } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { Note } from "../insights";
-
-const purchases = (count: number) =>
-  count === 1 ? "1 purchase" : `${count} purchases`;
+import { purchases } from "../labels";
 
 function Tile({
   children,
@@ -137,7 +140,7 @@ function render(note: Note) {
   const { month, average, months, change } = note;
   const name = formatMonthLong(month.month);
   const steady = Math.abs(change) < 1;
-  const Icon = change < 0 ? TrendingDown : TrendingUp;
+  const Icon = steady ? MoveRight : change < 0 ? TrendingDown : TrendingUp;
   return (
     <NoteItem
       key="month"
@@ -159,12 +162,14 @@ function render(note: Note) {
 interface StandOutCardProps {
   notes?: Note[];
   description: string;
+  stale?: boolean;
   className?: string;
 }
 
 export function StandOutCard({
   notes,
   description,
+  stale,
   className,
 }: StandOutCardProps) {
   return (
@@ -184,7 +189,15 @@ export function StandOutCard({
           Nothing to point out yet.
         </p>
       ) : (
-        <ul className="flex flex-col gap-2.5 sm:gap-3">{notes.map(render)}</ul>
+        <ul
+          aria-busy={stale || undefined}
+          className={cn(
+            "flex flex-col gap-2.5 transition-opacity sm:gap-3",
+            stale && "opacity-60",
+          )}
+        >
+          {notes.map(render)}
+        </ul>
       )}
     </SectionCard>
   );

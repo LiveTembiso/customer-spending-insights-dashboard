@@ -65,6 +65,7 @@ export function InsightsPageSkeleton() {
           <SectionCardSkeleton lines={5} />
           <SectionCardSkeleton lines={3} />
         </div>
+        <SectionCardSkeleton lines={6} />
       </div>
     </>
   );
