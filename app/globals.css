@@ -20,6 +20,7 @@
   --color-sidebar: var(--sidebar);
   --color-navy: var(--navy);
   --color-nav-active: var(--nav-active);
+  --color-bar-muted: var(--bar-muted);
   --color-heading: var(--heading);
   --color-primary-hover: var(--primary-hover);
   --color-navy-raised: var(--navy-raised);
@@ -112,6 +113,7 @@
   --sidebar-border: #22344d;
   --sidebar-ring: #7aa2ff;
   --nav-active: #2a6fd6;
+  --bar-muted: #c9d9f2;
 }
 
 .dark {
