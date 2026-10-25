@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
+
+import { Button, buttonVariants } from "@/components/ui/button";
+
 import { X } from "lucide-react";
 import Link from "next/link";
 import { type RefObject, useEffect, useRef } from "react";
@@ -32,6 +43,7 @@ interface DetailsProps {
   titleId: string;
   titleRef?: RefObject<HTMLHeadingElement | null>;
   onClose: () => void;
+  modal?: boolean;
 }
 
 function TransactionDetails({
@@ -40,28 +52,31 @@ function TransactionDetails({
   titleId,
   titleRef,
   onClose,
+  modal = false,
 }: DetailsProps) {
   const date = new Date(transaction.date);
+  const Title = modal ? DialogTitle : "h2";
 
   return (
     <div className="flex flex-col gap-[18px]">
       <div className="flex items-center justify-between gap-2">
-        <h2
+        <Title
           id={titleId}
           ref={titleRef}
           tabIndex={-1}
           className="text-base font-bold focus:outline-hidden"
         >
           Transaction details
-        </h2>
-        <button
+        </Title>
+        <Button
+          variant="ghost"
           type="button"
           aria-label="Close details"
           onClick={onClose}
           className="-mr-2.5 flex size-11 items-center justify-center rounded-[10px] text-muted-strong hover:bg-muted"
         >
           <X aria-hidden className="size-5" />
-        </button>
+        </Button>
       </div>
       <div className="flex items-center gap-3">
         <MerchantAvatar
@@ -106,7 +121,8 @@ function GoalImpact({ goal, amount }: { goal: Goal; amount: number }) {
 
   return (
     <>
-      <section
+      <Card
+        role="region"
         aria-labelledby="goal-impact-title"
         className={cn(
           "flex flex-col gap-2 rounded-[14px] border p-3.5",
@@ -124,28 +140,26 @@ function GoalImpact({ goal, amount }: { goal: Goal; amount: number }) {
           {goal.category} goal · {used}% used
           <span className="sr-only">, {status.label.toLowerCase()}</span>
         </h3>
-        <div
-          role="img"
-          aria-label={`${used} percent of the ${category} budget used`}
-          className={cn(
-            "h-2 overflow-hidden rounded-full forced-color-adjust-none",
-            tone.track,
-          )}
-        >
-          <div
-            className={cn("h-full rounded-full", status.bar)}
-            style={{ width: `${Math.min(goal.percentageUsed, 100)}%` }}
-          />
-        </div>
+        <Progress
+          value={Math.min(goal.percentageUsed, 100)}
+          aria-label={`${goal.category} budget used`}
+          aria-valuetext={`${used} percent of the ${category} budget used`}
+          className="block h-2 forced-color-adjust-none"
+          trackClassName={cn("h-full", tone.track)}
+          indicatorClassName={cn("rounded-full", status.bar)}
+        />
         <p className={cn("text-[13px] leading-[1.45]", tone.text)}>
           This purchase is {formatPercent((amount / goal.monthlyBudget) * 100)}{" "}
           of your {formatRands(goal.monthlyBudget, { cents: false })} monthly
           budget.
         </p>
-      </section>
+      </Card>
       <Link
         href="/goals"
-        className="flex min-h-11 items-center text-sm font-bold text-primary hover:text-primary-hover"
+        className={cn(
+          buttonVariants({ variant: "outline" }),
+          "flex min-h-11 items-center text-sm font-bold text-primary hover:text-primary-hover",
+        )}
       >
         View {category} goal
       </Link>
@@ -173,7 +187,8 @@ export function TransactionDetailsPanel({
   }, [transaction.id]);
 
   return (
-    <aside
+    <Card
+      role="complementary"
       id={id}
       aria-labelledby="details-title"
       onKeyDown={(event) => {
@@ -188,7 +203,7 @@ export function TransactionDetailsPanel({
         titleRef={title}
         onClose={onClose}
       />
-    </aside>
+    </Card>
   );
 }
 
@@ -197,40 +212,36 @@ export function TransactionDetailsDialog({
   goal,
   onClose,
 }: Omit<PanelProps, "id" | "transaction"> & { transaction?: Transaction }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const element = dialog.current;
-    if (!element) return;
-    if (transaction && !element.open) element.showModal();
-    if (!transaction && element.open) element.close();
-  }, [transaction]);
-
   return (
-    <dialog
-      ref={dialog}
-      aria-labelledby="details-dialog-title"
-      onClose={onClose}
-      onClick={(event) => {
-        // Only the backdrop reaches the dialog itself; its padding is on the inner div.
-        if (event.target === event.currentTarget) event.currentTarget.close();
+    <Dialog
+      open={Boolean(transaction)}
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
-      className="mx-0 mt-auto mb-0 max-h-[90dvh] w-full max-w-none rounded-t-[24px] bg-card p-0 text-foreground backdrop:bg-navy/55 md:m-auto md:max-w-md md:rounded-[22px]"
     >
-      <div className="px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))] md:p-6">
+      <DialogContent
+        showCloseButton={false}
+        className="top-auto bottom-0 left-0 max-h-[90dvh] w-full max-w-none translate-x-0 translate-y-0 overflow-y-auto rounded-t-[24px] rounded-b-none bg-card px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))] text-foreground sm:max-w-none md:top-1/2 md:bottom-auto md:left-1/2 md:max-w-md md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[22px] md:p-6"
+      >
         <span
           aria-hidden
           className="mx-auto mb-2 block h-1 w-10 rounded-full bg-input md:hidden"
         />
         {transaction && (
-          <TransactionDetails
-            transaction={transaction}
-            goal={goal}
-            titleId="details-dialog-title"
-            onClose={() => dialog.current?.close()}
-          />
+          <>
+            <DialogDescription className="sr-only">
+              Details for {transaction.merchant}.
+            </DialogDescription>
+            <TransactionDetails
+              transaction={transaction}
+              goal={goal}
+              titleId="details-dialog-title"
+              modal
+              onClose={onClose}
+            />
+          </>
         )}
-      </div>
-    </dialog>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -1,4 +1,25 @@
 "use client";
+import { EmptyState } from "@/components/empty-state";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Pagination as PaginationRoot,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import { Item } from "@/components/ui/item";
+
+import { Card } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 import { ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
 import { Fragment, useRef } from "react";
@@ -55,7 +76,8 @@ export function TransactionList(props: TransactionListProps) {
   }
 
   return (
-    <section
+    <Card
+      role="region"
       aria-labelledby={LIST_TITLE_ID}
       aria-busy={stale}
       className="flex min-w-0 scroll-mt-4 flex-col gap-3.5 rounded-[18px] bg-card p-4 md:rounded-[22px] md:p-5.5"
@@ -87,7 +109,7 @@ export function TransactionList(props: TransactionListProps) {
           onPageChange={changePage}
         />
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -101,24 +123,27 @@ function ListBody(props: TransactionListProps) {
   if (response.transactions.length === 0) {
     const pastLastPage = response.pagination.total > 0;
     return (
-      <div className="flex flex-col items-start gap-3 rounded-[14px] bg-muted p-5">
-        <p className="font-semibold">
-          {pastLastPage
+      <EmptyState
+        className="rounded-[14px] bg-muted p-5"
+        message={
+          pastLastPage
             ? "There's nothing on this page."
             : filtered
               ? "No transactions match these filters."
-              : "No transactions in this period."}
-        </p>
+              : "No transactions in this period."
+        }
+      >
         {(pastLastPage || filtered) && (
-          <button
+          <Button
+            variant="ghost"
             type="button"
             onClick={pastLastPage ? () => props.onPageChange(1) : props.onReset}
             className="min-h-11 rounded-[12px] border-[1.5px] border-navy bg-card px-4 text-sm font-bold"
           >
             {pastLastPage ? "Go to the first page" : "Clear filters"}
-          </button>
+          </Button>
         )}
-      </div>
+      </EmptyState>
     );
   }
 
@@ -145,42 +170,45 @@ function TransactionTable({
   onSelect,
 }: RowsProps) {
   return (
-    <div className="hidden overflow-x-auto lg:block">
-      <table
+    <div className="hidden lg:block">
+      <Table
         aria-labelledby={LIST_TITLE_ID}
         className="w-full min-w-[46rem] border-collapse text-sm"
       >
-        <thead>
-          <tr className="bg-muted text-left text-[13px] text-muted-foreground">
-            <th scope="col" className="rounded-l-lg px-3 py-2.5 font-semibold">
+        <TableHeader>
+          <TableRow className="bg-muted text-left text-[13px] text-muted-foreground">
+            <TableHead
+              scope="col"
+              className="rounded-l-lg px-3 py-2.5 font-semibold"
+            >
               Date
-            </th>
-            <th scope="col" className="px-3 py-2.5 font-semibold">
+            </TableHead>
+            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
               Merchant
-            </th>
-            <th scope="col" className="px-3 py-2.5 font-semibold">
+            </TableHead>
+            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
               Category
-            </th>
-            <th scope="col" className="px-3 py-2.5 font-semibold">
+            </TableHead>
+            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
               Description
-            </th>
-            <th scope="col" className="px-3 py-2.5 font-semibold">
+            </TableHead>
+            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
               Paid with
-            </th>
-            <th
+            </TableHead>
+            <TableHead
               scope="col"
               className="rounded-r-lg px-3 py-2.5 text-right font-semibold"
             >
               Amount
-            </th>
-          </tr>
-        </thead>
-        <tbody className="tabular-nums">
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="tabular-nums">
           {transactions.map((transaction) => {
             const selected = transaction.id === selectedId;
             const date = new Date(transaction.date);
             return (
-              <tr
+              <TableRow
                 key={transaction.id}
                 aria-current={selected || undefined}
                 className={cn(
@@ -188,7 +216,7 @@ function TransactionTable({
                   selected && "bg-accent",
                 )}
               >
-                <td
+                <TableCell
                   className={cn(
                     "px-3 py-2 whitespace-nowrap",
                     selected &&
@@ -203,9 +231,10 @@ function TransactionTable({
                       {toTimeOfDay(date)}
                     </span>
                   </span>
-                </td>
-                <td className="px-3 py-2">
-                  <button
+                </TableCell>
+                <TableCell className="px-3 py-2">
+                  <Button
+                    variant="ghost"
                     id={rowButtonId(transaction.id, "table")}
                     type="button"
                     aria-expanded={detailsBeside ? selected : undefined}
@@ -218,28 +247,28 @@ function TransactionTable({
                   >
                     <MerchantAvatar transaction={transaction} />
                     {transaction.merchant}
-                  </button>
-                </td>
-                <td className="px-3 py-2">
+                  </Button>
+                </TableCell>
+                <TableCell className="px-3 py-2">
                   <CategoryPill
                     transaction={transaction}
                     className={cn(selected && "bg-card")}
                   />
-                </td>
-                <td className="px-3 py-2 text-muted-strong">
+                </TableCell>
+                <TableCell className="px-3 py-2 text-muted-strong">
                   {transaction.description}
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap text-muted-strong">
+                </TableCell>
+                <TableCell className="px-3 py-2 whitespace-nowrap text-muted-strong">
                   {transaction.paymentMethod}
-                </td>
-                <td className="px-3 py-2 text-right font-bold whitespace-nowrap">
+                </TableCell>
+                <TableCell className="px-3 py-2 text-right font-bold whitespace-nowrap">
                   {debit(transaction.amount)}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -258,9 +287,9 @@ function TransactionItems({
     const when = byDate ? toTimeOfDay(date) : formatDay(toDayKey(date));
     return (
       <li key={transaction.id}>
-        <button
+        <Item
+          render={<Button variant="ghost" type="button" />}
           id={rowButtonId(transaction.id, "list")}
-          type="button"
           aria-haspopup="dialog"
           onClick={() => onSelect(transaction)}
           className={cn(
@@ -281,7 +310,7 @@ function TransactionItems({
           <span className="font-bold whitespace-nowrap tabular-nums">
             {debit(transaction.amount)}
           </span>
-        </button>
+        </Item>
       </li>
     );
   };
@@ -338,7 +367,7 @@ function Pagination({
     "flex min-h-11 items-center gap-1 rounded-[10px] border text-sm disabled:border-border disabled:bg-muted disabled:font-semibold disabled:text-muted-foreground";
 
   return (
-    <nav
+    <PaginationRoot
       aria-label="Pages"
       className="flex flex-wrap items-center justify-between gap-3 pt-1"
     >
@@ -347,49 +376,66 @@ function Pagination({
           ? `Showing ${offset + 1}–${offset + shown} of ${total}`
           : `${total} in total`}
       </span>
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          disabled={page <= 1}
-          onClick={() => onPageChange(Math.min(page - 1, pages))}
-          className={cn(button, "border-navy bg-card pr-3.5 pl-2.5 font-bold")}
-        >
-          <ChevronLeft aria-hidden className="size-4" />
-          Previous
-        </button>
-        <span className="px-1 text-[13px] text-muted-strong tabular-nums">
-          Page {page} of {pages}
-        </span>
-        <button
-          type="button"
-          disabled={page >= pages}
-          onClick={() => onPageChange(page + 1)}
-          className={cn(button, "border-navy bg-card pr-2.5 pl-3.5 font-bold")}
-        >
-          Next
-          <ChevronRight aria-hidden className="size-4" />
-        </button>
-      </div>
-    </nav>
+      <PaginationContent className="gap-2">
+        <PaginationItem>
+          <Button
+            variant="ghost"
+            type="button"
+            disabled={page <= 1}
+            onClick={() => onPageChange(Math.min(page - 1, pages))}
+            className={cn(
+              button,
+              "border-navy bg-card pr-3.5 pl-2.5 font-bold",
+            )}
+          >
+            <ChevronLeft aria-hidden className="size-4" />
+            Previous
+          </Button>
+        </PaginationItem>
+        <PaginationItem>
+          <span className="px-1 text-[13px] text-muted-strong tabular-nums">
+            Page {page} of {pages}
+          </span>
+        </PaginationItem>
+        <PaginationItem>
+          <Button
+            variant="ghost"
+            type="button"
+            disabled={page >= pages}
+            onClick={() => onPageChange(page + 1)}
+            className={cn(
+              button,
+              "border-navy bg-card pr-2.5 pl-3.5 font-bold",
+            )}
+          >
+            Next
+            <ChevronRight aria-hidden className="size-4" />
+          </Button>
+        </PaginationItem>
+      </PaginationContent>
+    </PaginationRoot>
   );
 }
 
 function LoadError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div
+    <Alert
       role="alert"
       className="flex flex-col items-start gap-3 rounded-[14px] bg-muted p-5"
     >
-      <p className="font-semibold">Your transactions didn&apos;t load.</p>
-      <button
+      <AlertDescription className="font-semibold text-foreground">
+        Your transactions didn&apos;t load.
+      </AlertDescription>
+      <Button
+        variant="ghost"
         type="button"
         onClick={onRetry}
         className="flex min-h-11 items-center gap-2 rounded-[12px] bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-primary-hover"
       >
         <RotateCw aria-hidden className="size-4" />
         Try again
-      </button>
-    </div>
+      </Button>
+    </Alert>
   );
 }
 

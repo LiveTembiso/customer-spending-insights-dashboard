@@ -1,3 +1,12 @@
+import { EmptyState } from "@/components/empty-state";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { SectionCard } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryDot } from "@/features/categories/components/category-dot";
@@ -41,7 +50,7 @@ export function CategorySpendCard({
       {!breakdown || !spent ? (
         <Skeleton className="h-44 w-full" />
       ) : spent.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No spending yet.</p>
+        <EmptyState message="No spending yet." />
       ) : (
         <div
           aria-busy={stale || undefined}
@@ -100,43 +109,43 @@ export function CategorySpendCard({
             ))}
           </ul>
 
-          <div className="hidden min-w-0 flex-[1_1_320px] overflow-x-auto sm:block">
-            <table
+          <div className="hidden min-w-0 flex-[1_1_320px] sm:block">
+            <Table
               aria-labelledby="category-spend-title"
               className="w-full border-collapse text-sm"
             >
-              <thead>
-                <tr className="text-left text-xs text-muted-foreground">
-                  <th scope="col" className="pr-2 pb-2 font-semibold">
+              <TableHeader>
+                <TableRow className="text-left text-xs text-muted-foreground">
+                  <TableHead scope="col" className="pr-2 pb-2 font-semibold">
                     Category
-                  </th>
-                  <th
+                  </TableHead>
+                  <TableHead
                     scope="col"
                     className="px-2 pb-2 text-right font-semibold"
                   >
                     Spent
-                  </th>
-                  <th
+                  </TableHead>
+                  <TableHead
                     scope="col"
                     className="px-2 pb-2 text-right font-semibold"
                   >
                     Purchases
-                  </th>
-                  <th
+                  </TableHead>
+                  <TableHead
                     scope="col"
                     className="pb-2 pl-2 text-right font-semibold"
                   >
                     Average
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="tabular-nums">
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="tabular-nums">
                 {spent.map((category) => (
-                  <tr
+                  <TableRow
                     key={category.name}
                     className="border-t border-background"
                   >
-                    <th
+                    <TableHead
                       scope="row"
                       className="py-2.5 pr-2 text-left font-normal"
                     >
@@ -144,25 +153,25 @@ export function CategorySpendCard({
                         <CategoryDot color={category.color} />
                         {category.name}
                       </span>
-                    </th>
-                    <td className="px-2 py-2.5 text-right font-bold">
+                    </TableHead>
+                    <TableCell className="px-2 py-2.5 text-right font-bold">
                       {formatRands(category.amount)}{" "}
                       <span className="sr-only">
                         ({category.percentage.toFixed(1)}% of spending)
                       </span>
-                    </td>
-                    <td className="px-2 py-2.5 text-right">
+                    </TableCell>
+                    <TableCell className="px-2 py-2.5 text-right">
                       {category.transactionCount}
-                    </td>
-                    <td className="py-2.5 pl-2 text-right text-muted-strong">
+                    </TableCell>
+                    <TableCell className="py-2.5 pl-2 text-right text-muted-strong">
                       {formatRands(
                         averageOf(category.amount, category.transactionCount),
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}

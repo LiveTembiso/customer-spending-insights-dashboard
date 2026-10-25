@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { selectOption } from "./helpers/select";
 
 test.describe("insights", () => {
   test("shows spending for the period, by month and by category", async ({
@@ -34,9 +35,9 @@ test.describe("insights", () => {
       page.getByRole("region", { name: "Compared with the previous 90 days" }),
     ).toBeVisible();
 
-    await page.getByLabel("Show", { exact: true }).selectOption("count");
+    await selectOption(page, "Show", "Transaction count");
     await expect(page).toHaveURL(/metric=count/);
-    await page.getByLabel("Months", { exact: true }).selectOption("12");
+    await selectOption(page, "Months", "12");
     await expect(page).toHaveURL(/\?period=90d&months=12&metric=count$/);
     await expect(
       page.getByRole("img", { name: /^Transaction count by month/ }),
@@ -46,6 +47,6 @@ test.describe("insights", () => {
     await expect(
       page.getByRole("button", { name: "90 days", pressed: true }),
     ).toBeVisible();
-    await expect(page.getByLabel("Months", { exact: true })).toHaveValue("12");
+    await expect(page.getByLabel("Months", { exact: true })).toHaveText("12");
   });
 });

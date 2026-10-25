@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/empty-state";
 import { SectionCard } from "@/components/layout/section-card";
 import { formatRands } from "@/lib/format";
 
@@ -36,7 +37,7 @@ export async function GoalsCard() {
       link={{ href: "/goals", label: "View all", context: "spending goals" }}
     >
       {progress.goals.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No goals set yet.</p>
+        <EmptyState message="No goals set yet." />
       ) : (
         <ul className="flex flex-col gap-4.5">
           {progress.goals.map((goal) => (

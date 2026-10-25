@@ -1,3 +1,4 @@
+import { Item } from "@/components/ui/item";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -29,8 +30,8 @@ export function GoalList({ title, goals, monthElapsed, today }: GoalListProps) {
           const id = (part: string) => `${goal.id}-${part}`;
           return (
             <li key={goal.id} className="border-t border-background">
-              <Link
-                href={purchasesHref(goal.category, today)}
+              <Item
+                render={<Link href={purchasesHref(goal.category, today)} />}
                 // Named by category and action; the figures describe it, so
                 // the name stays short.
                 aria-labelledby={`${id("name")} ${id("cue")}`}
@@ -97,7 +98,7 @@ export function GoalList({ title, goals, monthElapsed, today }: GoalListProps) {
                     className="size-4 text-muted-foreground sm:hidden"
                   />
                 </span>
-              </Link>
+              </Item>
             </li>
           );
         })}

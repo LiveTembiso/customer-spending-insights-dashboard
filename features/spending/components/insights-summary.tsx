@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -87,7 +88,7 @@ export function InsightsSummary({
         stale && "opacity-60",
       )}
     >
-      <div className={tile}>
+      <Card className={tile}>
         <span className={label}>Total spent</span>
         <span className={figure}>{formatRands(summary.totalSpent)}</span>
         <Change
@@ -96,8 +97,8 @@ export function InsightsSummary({
           previous={PERIOD_LABELS[period].previous}
           colors={["text-warning-foreground", "text-primary"]}
         />
-      </div>
-      <div className={tile}>
+      </Card>
+      <Card className={tile}>
         <span className={label}>Transactions</span>
         <span className={figure}>{summary.transactionCount}</span>
         <Change
@@ -106,8 +107,8 @@ export function InsightsSummary({
           previous={PERIOD_LABELS[period].previous}
           colors={["text-muted-strong", "text-muted-strong"]}
         />
-      </div>
-      <div
+      </Card>
+      <Card
         className={cn(
           tile,
           "col-span-2 flex-row items-center gap-3 sm:gap-3 lg:col-span-1 lg:flex-col lg:items-start lg:gap-1.5",
@@ -142,7 +143,7 @@ export function InsightsSummary({
             of spend
           </span>
         )}
-      </div>
+      </Card>
     </section>
   );
 }
@@ -151,14 +152,14 @@ export function InsightsSummarySkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
       {[0, 1, 2].map((index) => (
-        <div
+        <Card
           key={index}
           className={cn(tile, index === 2 && "col-span-2 lg:col-span-1")}
         >
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-7 w-28" />
           <Skeleton className="h-4 w-24" />
-        </div>
+        </Card>
       ))}
     </div>
   );

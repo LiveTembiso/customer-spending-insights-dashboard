@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/empty-state";
 import { SectionCard } from "@/components/layout/section-card";
 import { formatDayRange, formatRands } from "@/lib/format";
 
@@ -29,7 +30,7 @@ export async function CategoryBreakdownCard() {
       }}
     >
       {spent.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No spending yet.</p>
+        <EmptyState message="No spending yet." />
       ) : (
         <div className="flex justify-center py-2">
           <CategoryDonut

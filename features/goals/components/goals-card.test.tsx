@@ -19,6 +19,11 @@ async function renderCard(goals: Goal[]) {
 }
 
 describe("GoalsCard", () => {
+  it("omits the card when goal data is unavailable", async () => {
+    vi.mocked(getCurrentGoalsProgress).mockResolvedValue(undefined);
+    const { container } = render(await GoalsCard());
+    expect(container).toBeEmptyDOMElement();
+  });
   it("shows a goal's status, spend and days left", async () => {
     await renderCard([goal({})]);
 
@@ -32,12 +37,16 @@ describe("GoalsCard", () => {
     await renderCard([
       goal({ currentSpent: 1120, percentageUsed: 112, status: "exceeded" }),
     ]);
-    const bar = screen.getByRole("img", {
-      name: /^112 percent of the groceries budget used/,
+    const bar = screen.getByRole("progressbar", {
+      name: "Groceries budget used",
     });
 
     expect(screen.getByText("Over budget")).toBeInTheDocument();
-    expect(bar.firstElementChild).toHaveStyle({ width: "100%" });
+    expect(bar).toHaveAttribute("aria-valuenow", "100");
+    expect(bar).toHaveAttribute(
+      "aria-valuetext",
+      expect.stringContaining("112 percent used"),
+    );
   });
 
   it("uses the singular for the last day", async () => {

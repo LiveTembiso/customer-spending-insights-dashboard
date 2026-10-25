@@ -1,5 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { selectOption } from "@/test-utils/select";
 import { type ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -186,14 +187,14 @@ describe("InsightsExplorer", () => {
 
   it("keeps the chart settings in the URL", async () => {
     renderExplorer("period=7d");
-    await userEvent.selectOptions(screen.getByLabelText("Show"), "count");
+    await selectOption("Show", "Transaction count");
     expect(window.history.pushState).toHaveBeenLastCalledWith(
       null,
       "",
       "?period=7d&metric=count",
     );
     // The page hasn't re-rendered with the new URL, and must not lose it.
-    await userEvent.selectOptions(screen.getByLabelText("Months"), "24");
+    await selectOption("Months", "24");
     expect(window.history.pushState).toHaveBeenLastCalledWith(
       null,
       "",

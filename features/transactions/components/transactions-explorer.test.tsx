@@ -14,7 +14,6 @@ import { CATEGORIES } from "@/features/categories/catalogue";
 import { goalsQuery } from "@/features/goals/api";
 import type { Goal } from "@/features/goals/schemas";
 import { categoriesQuery } from "@/features/spending/api";
-import { installDialogMock } from "@/test-utils/dialog";
 import { makeGoal, makeTransaction } from "@/test-utils/fixtures";
 import {
   createQueryWrapper,
@@ -122,8 +121,6 @@ beforeEach(() => {
       removeEventListener: vi.fn(),
     })),
   );
-  // jsdom has no modal dialogs.
-  installDialogMock();
 });
 
 afterEach(() => {

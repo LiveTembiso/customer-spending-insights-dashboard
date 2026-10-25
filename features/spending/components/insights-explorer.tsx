@@ -1,5 +1,10 @@
 "use client";
 
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+import { Button } from "@/components/ui/button";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
@@ -29,52 +34,58 @@ function PeriodControl({
   onChange: (period: Period) => void;
 }) {
   return (
-    <div
-      role="group"
+    <ToggleGroup
+      value={[period]}
+      onValueChange={(values) => {
+        const next = PERIODS.find((value) => value === values[0]);
+        if (next) onChange(next);
+      }}
       aria-label="Period"
       className="grid w-full grid-cols-4 gap-1 rounded-[12px] bg-card p-1 sm:flex sm:w-auto"
     >
       {PERIODS.map((value) => {
         const pressed = value === period;
         return (
-          <button
+          <ToggleGroupItem
             key={value}
             type="button"
-            aria-pressed={pressed}
-            onClick={() => onChange(value)}
+            value={value}
             className={cn(
               "min-h-11 rounded-[9px] border border-transparent px-3.5 text-[13px] whitespace-nowrap sm:text-sm",
               pressed
                 ? cn(
-                    "bg-navy font-bold text-navy-foreground",
+                    "bg-navy font-bold text-navy-foreground data-pressed:bg-navy data-pressed:text-navy-foreground data-pressed:hover:bg-navy",
                     pressedInForcedColors,
                   )
                 : "font-semibold text-muted-strong hover:bg-background",
             )}
           >
             {PERIOD_LABELS[value].short}
-          </button>
+          </ToggleGroupItem>
         );
       })}
-    </div>
+    </ToggleGroup>
   );
 }
 
 function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
   return (
-    <div
+    <Alert
       role="alert"
       className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] bg-card p-5"
     >
-      <p className="text-sm text-muted-strong">We couldn&apos;t load {what}.</p>
-      <button
+      <AlertDescription className="text-sm text-muted-strong">
+        We couldn&apos;t load {what}.
+      </AlertDescription>
+      <Button
+        variant="ghost"
         type="button"
         onClick={onRetry}
         className="min-h-11 rounded-[12px] border-[1.5px] border-navy px-4 text-sm font-bold text-navy hover:bg-background"
       >
         Try again
-      </button>
-    </div>
+      </Button>
+    </Alert>
   );
 }
 

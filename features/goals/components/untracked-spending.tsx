@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/empty-state";
+import { Item } from "@/components/ui/item";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -20,17 +22,15 @@ export async function UntrackedSpending() {
       description={`This month so far, ${formatDayRange(startDate, endDate)}`}
     >
       {spending.categories.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nothing yet this month outside your goals.
-        </p>
+        <EmptyState message="Nothing yet this month outside your goals." />
       ) : (
         <ul className="-mt-1 flex flex-col">
           {spending.categories.map((category) => {
             const id = (part: string) => `untracked-${category.name}-${part}`;
             return (
               <li key={category.name} className="border-t border-background">
-                <Link
-                  href={purchasesHref(category.name, endDate)}
+                <Item
+                  render={<Link href={purchasesHref(category.name, endDate)} />}
                   aria-labelledby={`${id("name")} ${id("cue")}`}
                   aria-describedby={`${id("count")} ${id("amount")}`}
                   className="group -mx-3 flex min-h-14 items-center gap-3 rounded-[12px] px-3 py-2.5 hover:bg-background sm:gap-3.5"
@@ -75,7 +75,7 @@ export async function UntrackedSpending() {
                     aria-hidden
                     className="size-4 text-muted-foreground sm:hidden"
                   />
-                </Link>
+                </Item>
               </li>
             );
           })}

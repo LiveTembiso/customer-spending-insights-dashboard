@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { Goal } from "@/features/goals/schemas";
-import { installDialogMock } from "@/test-utils/dialog";
+import { useState } from "react";
 import { makeGoal, makeTransaction } from "@/test-utils/fixtures";
 
 import type { Transaction } from "../schemas";
@@ -13,11 +13,6 @@ import {
 } from "./transaction-details";
 
 const transaction: Transaction = makeTransaction();
-
-beforeEach(() => {
-  // jsdom doesn't implement native modal opening and closing.
-  installDialogMock();
-});
 
 describe("TransactionDetailsDialog", () => {
   it("opens for a selected purchase and closes when the selection clears", () => {
@@ -31,17 +26,31 @@ describe("TransactionDetailsDialog", () => {
     expect(screen.getByText("−R245.80")).toBeVisible();
     rerender(<TransactionDetailsDialog onClose={onClose} />);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(onClose).toHaveBeenCalledOnce();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("keeps content clicks open and dismisses on a backdrop click", async () => {
     const onClose = vi.fn();
-    render(
-      <TransactionDetailsDialog transaction={transaction} onClose={onClose} />,
-    );
+    function Selection() {
+      const [selected, setSelected] = useState<typeof transaction | undefined>(
+        transaction,
+      );
+      return (
+        <TransactionDetailsDialog
+          transaction={selected}
+          onClose={() => {
+            onClose();
+            setSelected(undefined);
+          }}
+        />
+      );
+    }
+    render(<Selection />);
     await userEvent.click(screen.getByText("Weekly groceries"));
     expect(onClose).not.toHaveBeenCalled();
-    await userEvent.click(screen.getByRole("dialog"));
+    await userEvent.click(
+      document.querySelector<HTMLElement>('[data-slot="dialog-overlay"]')!,
+    );
     expect(onClose).toHaveBeenCalledOnce();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
@@ -94,12 +103,17 @@ describe("TransactionDetailsPanel", () => {
           onClose={vi.fn()}
         />,
       );
-      const bar = screen.getByRole("img", {
-        name: /percent of the groceries budget used/,
+      const bar = screen.getByRole("progressbar", {
+        name: "Groceries budget used",
       });
-      expect(bar.firstElementChild).toHaveStyle({
-        width: status === "exceeded" ? "100%" : "50%",
-      });
+      expect(bar).toHaveAttribute(
+        "aria-valuenow",
+        status === "exceeded" ? "100" : "50",
+      );
+      expect(bar).toHaveAttribute(
+        "aria-valuetext",
+        `${status === "exceeded" ? 112 : 50} percent of the groceries budget used`,
+      );
       expect(screen.getByText(/This purchase is 24.6% of your/)).toBeVisible();
       expect(
         screen.getByRole("link", { name: "View groceries goal" }),

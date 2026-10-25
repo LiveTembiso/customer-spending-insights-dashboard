@@ -1,5 +1,7 @@
+import { EmptyState } from "@/components/empty-state";
+import { SelectField } from "@/components/select-field";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { NativeSelect } from "@/components/ui/native-select";
 import { formatMonthLong, formatMonthShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +46,8 @@ export function SpendingChartCard({
   stale,
 }: SpendingChartCardProps) {
   return (
-    <section
+    <Card
+      role="region"
       aria-labelledby={TITLE_ID}
       className="flex min-w-0 flex-col gap-5 rounded-[22px] bg-card p-5 sm:p-6"
     >
@@ -58,52 +61,34 @@ export function SpendingChartCard({
           )}
         </div>
         <div className="flex flex-wrap items-end gap-2.5">
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="chart-metric"
-              className="text-xs font-semibold text-muted-foreground"
-            >
-              Show
-            </label>
-            <NativeSelect
-              id="chart-metric"
-              value={metric}
-              onChange={(event) =>
-                onChange({ metric: event.target.value as Metric })
-              }
-            >
-              {METRICS.map((option) => (
-                <option key={option} value={option}>
-                  {METRIC_LABELS[option]}
-                </option>
-              ))}
-            </NativeSelect>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor="chart-months"
-              className="text-xs font-semibold text-muted-foreground"
-            >
-              Months
-            </label>
-            <NativeSelect
-              id="chart-months"
-              value={months}
-              onChange={(event) =>
-                onChange({ months: Number(event.target.value) as MonthChoice })
-              }
-            >
-              {MONTH_CHOICES.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </NativeSelect>
-          </div>
+          <SelectField
+            className="w-auto"
+            id="chart-metric"
+            label="Show"
+            value={metric}
+            items={METRICS.map((option) => ({
+              value: option,
+              label: METRIC_LABELS[option],
+            }))}
+            onValueChange={(metric) => onChange({ metric: metric as Metric })}
+          />
+          <SelectField
+            className="w-auto"
+            id="chart-months"
+            label="Months"
+            value={String(months)}
+            items={MONTH_CHOICES.map((option) => ({
+              value: String(option),
+              label: String(option),
+            }))}
+            onValueChange={(months) =>
+              onChange({ months: Number(months) as MonthChoice })
+            }
+          />
         </div>
       </div>
       {trends?.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No spending yet.</p>
+        <EmptyState message="No spending yet." />
       ) : trends ? (
         <Chart
           trends={trends}
@@ -114,7 +99,7 @@ export function SpendingChartCard({
       ) : (
         <Skeleton className="h-57.5 w-full sm:h-62.5" />
       )}
-    </section>
+    </Card>
   );
 }
 

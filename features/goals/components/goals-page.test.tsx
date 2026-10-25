@@ -9,7 +9,11 @@ import {
   getCurrentGoalsProgress,
   getCurrentUntrackedSpending,
 } from "../server/current";
-import { GoalsMonth, GoalsOverview } from "./goals-overview";
+import {
+  GoalsMonth,
+  GoalsOverview,
+  GoalsOverviewSkeleton,
+} from "./goals-overview";
 import { UntrackedSpending } from "./untracked-spending";
 
 vi.mock("../server/current", () => ({
@@ -47,6 +51,14 @@ async function renderOverview(list: Goal[]) {
 }
 
 describe("GoalsOverview", () => {
+  it("omits unavailable data and offers placeholders while loading", async () => {
+    vi.mocked(getCurrentGoalsProgress).mockResolvedValue(undefined);
+    const { container, rerender } = render(await GoalsOverview());
+    expect(container).toBeEmptyDOMElement();
+    rerender(<GoalsOverviewSkeleton />);
+    expect(container).not.toBeEmptyDOMElement();
+    expect(screen.queryByText(/R[0-9]/)).not.toBeInTheDocument();
+  });
   it("adds up the budgets and what's been spent against them", async () => {
     await renderOverview(goals);
     const summary = screen.getByRole("region", { name: /at a glance/ });
@@ -144,6 +156,16 @@ describe("GoalsOverview", () => {
 });
 
 describe("GoalsMonth", () => {
+  it("omits an unavailable month and shows only the month when there are no goals", async () => {
+    vi.mocked(getCurrentGoalsProgress).mockResolvedValue(undefined);
+    expect(await GoalsMonth()).toBeNull();
+    vi.mocked(getCurrentGoalsProgress).mockResolvedValue({
+      goals: [],
+      monthElapsed: 64.5,
+      today: "2026-10-21",
+    });
+    expect(await GoalsMonth()).toBe("October");
+  });
   it("names the month and the days left", async () => {
     vi.mocked(getCurrentGoalsProgress).mockResolvedValue({
       goals,

@@ -1,3 +1,13 @@
+import { EmptyState } from "@/components/empty-state";
+import { Item } from "@/components/ui/item";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { SectionCard } from "@/components/layout/section-card";
 import { toDayKey } from "@/lib/dates";
 import { formatDay } from "@/lib/format";
@@ -24,12 +34,13 @@ export async function RecentTransactionsCard() {
       }}
     >
       {transactions.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No transactions yet.</p>
+        <EmptyState message="No transactions yet." />
       ) : (
         <>
           <ul className="flex flex-col lg:hidden">
             {transactions.map((transaction) => (
-              <li
+              <Item
+                render={<li />}
                 key={transaction.id}
                 className="flex items-center gap-3 border-t border-background py-3 first:border-t-0 first:pt-0"
               >
@@ -46,67 +57,68 @@ export async function RecentTransactionsCard() {
                 <span className="font-bold tabular-nums">
                   {debit(transaction.amount)}
                 </span>
-              </li>
+              </Item>
             ))}
           </ul>
 
-          <table
+          <Table
+            containerProps={{ className: "hidden lg:block" }}
             aria-labelledby="recent-title"
-            className="hidden w-full border-collapse text-sm lg:table"
+            className="w-full border-collapse text-sm"
           >
-            <thead>
-              <tr className="bg-muted text-left text-[13px] text-muted-foreground">
-                <th
+            <TableHeader>
+              <TableRow className="bg-muted text-left text-[13px] text-muted-foreground">
+                <TableHead
                   scope="col"
                   className="rounded-l-lg px-3 py-2.5 font-semibold"
                 >
                   Date
-                </th>
-                <th scope="col" className="px-3 py-2.5 font-semibold">
+                </TableHead>
+                <TableHead scope="col" className="px-3 py-2.5 font-semibold">
                   Merchant
-                </th>
-                <th scope="col" className="px-3 py-2.5 font-semibold">
+                </TableHead>
+                <TableHead scope="col" className="px-3 py-2.5 font-semibold">
                   Category
-                </th>
-                <th scope="col" className="px-3 py-2.5 font-semibold">
+                </TableHead>
+                <TableHead scope="col" className="px-3 py-2.5 font-semibold">
                   Description
-                </th>
-                <th
+                </TableHead>
+                <TableHead
                   scope="col"
                   className="rounded-r-lg px-3 py-2.5 text-right font-semibold"
                 >
                   Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody className="tabular-nums">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="tabular-nums">
               {transactions.map((transaction) => (
-                <tr
+                <TableRow
                   key={transaction.id}
                   className="border-b border-background last:border-b-0"
                 >
-                  <td className="px-3 py-3 whitespace-nowrap text-muted-foreground">
+                  <TableCell className="px-3 py-3 whitespace-nowrap text-muted-foreground">
                     {formatDay(toDayKey(new Date(transaction.date)))}
-                  </td>
-                  <td className="px-3 py-3 font-bold">
+                  </TableCell>
+                  <TableCell className="px-3 py-3 font-bold">
                     <span className="inline-flex items-center gap-2.5">
                       <MerchantAvatar transaction={transaction} />
                       {transaction.merchant}
                     </span>
-                  </td>
-                  <td className="px-3 py-3">
+                  </TableCell>
+                  <TableCell className="px-3 py-3">
                     <CategoryPill transaction={transaction} />
-                  </td>
-                  <td className="px-3 py-3 text-muted-strong">
+                  </TableCell>
+                  <TableCell className="px-3 py-3 text-muted-strong">
                     {transaction.description}
-                  </td>
-                  <td className="px-3 py-3 text-right font-bold whitespace-nowrap">
+                  </TableCell>
+                  <TableCell className="px-3 py-3 text-right font-bold whitespace-nowrap">
                     {debit(transaction.amount)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </>
       )}
     </SectionCard>

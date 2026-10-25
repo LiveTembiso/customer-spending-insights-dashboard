@@ -3,6 +3,7 @@
 import { RotateCw } from "lucide-react";
 import { useEffect, useRef } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardError({
@@ -21,18 +22,20 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <section className="flex flex-col items-start gap-3 rounded-[22px] bg-card p-6">
-      <h1
-        ref={heading}
-        tabIndex={-1}
-        className="text-[22px] font-extrabold tracking-tight text-heading outline-hidden"
-      >
-        This page didn&apos;t load
-      </h1>
-      <p className="max-w-prose text-muted-foreground">
+    <Alert className="flex flex-col items-start gap-3 rounded-[22px] bg-card p-6">
+      <AlertTitle>
+        <h1
+          ref={heading}
+          tabIndex={-1}
+          className="text-[22px] font-extrabold tracking-tight text-heading outline-hidden"
+        >
+          This page didn&apos;t load
+        </h1>
+      </AlertTitle>
+      <AlertDescription className="max-w-prose text-muted-foreground">
         Something went wrong on our side. Your data is safe. Try again, or come
         back in a few minutes.
-      </p>
+      </AlertDescription>
       {error.digest && (
         <p className="text-sm text-muted-foreground">
           Reference: {error.digest}
@@ -42,6 +45,6 @@ export default function DashboardError({
         <RotateCw aria-hidden className="size-4" />
         Try again
       </Button>
-    </section>
+    </Alert>
   );
 }

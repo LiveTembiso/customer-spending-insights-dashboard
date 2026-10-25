@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import { CircleCheck, TriangleAlert } from "lucide-react";
 
 import { formatRands } from "@/lib/format";
@@ -40,7 +41,7 @@ export function GoalsSummary({
 
   return (
     <section aria-label="This month's goals at a glance">
-      <div className="relative grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3.5 overflow-hidden rounded-[18px] bg-navy px-4.5 py-4 text-navy-foreground lg:hidden">
+      <Card className="relative grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3.5 overflow-hidden rounded-[18px] bg-navy px-4.5 py-4 text-navy-foreground lg:hidden">
         <span
           aria-hidden
           className="absolute -top-20 -right-15 size-42.5 rounded-full bg-navy-raised"
@@ -56,10 +57,10 @@ export function GoalsSummary({
           <span className="text-xs text-navy-muted">Need attention</span>
           <span className="text-[17px] font-extrabold">{count}</span>
         </div>
-      </div>
+      </Card>
 
       <div className="hidden grid-cols-3 gap-3 lg:grid">
-        <div
+        <Card
           className={cn(
             tile,
             "relative overflow-hidden bg-navy text-navy-foreground",
@@ -78,8 +79,8 @@ export function GoalsSummary({
           <span className="relative text-[13px] text-navy-muted">
             across {goals.length} {goals.length === 1 ? "goal" : "goals"}
           </span>
-        </div>
-        <div className={cn(tile, "bg-card")}>
+        </Card>
+        <Card className={cn(tile, "bg-card")}>
           <span className="text-[13px] text-muted-foreground">
             Spent against goals
           </span>
@@ -87,8 +88,8 @@ export function GoalsSummary({
           <span className="text-[13px] text-muted-foreground">
             {share}% of your budgets
           </span>
-        </div>
-        <div className={cn(tile, "bg-card")}>
+        </Card>
+        <Card className={cn(tile, "bg-card")}>
           <span className="text-[13px] text-muted-foreground">
             Need attention
           </span>
@@ -106,7 +107,7 @@ export function GoalsSummary({
           <span className="text-[13px] text-muted-foreground">
             {attentionNote(attention, monthElapsed)}
           </span>
-        </div>
+        </Card>
       </div>
     </section>
   );
