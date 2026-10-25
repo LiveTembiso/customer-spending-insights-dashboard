@@ -84,7 +84,7 @@ export async function MonthSpendCard() {
         )}
       </div>
 
-      <div className="flex flex-col gap-1 border-t border-white/15 pt-4 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
+      <div className="flex flex-col gap-1 border-t border-white/15 pt-4 sm:justify-center sm:border-t-0 sm:border-l sm:pt-0 sm:pl-6">
         <p className="text-[28px] leading-none font-extrabold tabular-nums">
           {month.transactionCount}
         </p>
@@ -112,7 +112,7 @@ export function MonthSpendCardSkeleton() {
         <Skeleton className="h-10 w-52 bg-navy-raised" />
         <Skeleton className="h-5 w-40 bg-navy-raised" />
       </div>
-      <div className="flex flex-col gap-2 sm:pl-6">
+      <div className="flex flex-col gap-2 sm:justify-center sm:pl-6">
         <Skeleton className="h-7 w-12 bg-navy-raised" />
         <Skeleton className="h-4 w-24 bg-navy-raised" />
       </div>
