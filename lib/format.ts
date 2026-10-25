@@ -20,6 +20,24 @@ export function formatRands(
   return `${value < 0 ? "-" : ""}R${digits}`;
 }
 
+const UNITS = [
+  { size: 1e9, suffix: "B" },
+  { size: 1e6, suffix: "M" },
+  { size: 1e3, suffix: "K" },
+];
+
+/** "R30K", "R2.5K", "R1.25M": at most 3 significant digits, for chart axes. */
+export function formatCompactRands(value: number): string {
+  if (!Number.isFinite(value)) return "—";
+  const sign = value < 0 ? "-" : "";
+  const size = Math.abs(value);
+  const scaled = (unit: number) => Number((size / unit).toPrecision(3));
+  // The largest unit the rounded amount reaches, so 999 950 is R1M, not R1000K.
+  const unit = UNITS.find(({ size: unitSize }) => scaled(unitSize) >= 1);
+  if (!unit) return sign + formatRands(size, { cents: false });
+  return `${sign}R${scaled(unit.size)}${unit.suffix}`;
+}
+
 export function formatPercent(value: number): string {
   return `${Math.abs(value).toFixed(1)}%`;
 }
