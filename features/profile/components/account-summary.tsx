@@ -1,3 +1,4 @@
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { initials } from "../initials";
@@ -12,12 +13,14 @@ export async function AccountSummary() {
 
   return (
     <div className="flex items-center gap-3 text-white">
-      <span
+      <Avatar
         aria-hidden
         className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#e6ecf3] text-sm font-bold text-navy"
       >
-        {initials(profile.name)}
-      </span>
+        <AvatarFallback className="bg-transparent font-bold text-inherit">
+          {initials(profile.name)}
+        </AvatarFallback>
+      </Avatar>
       <span className="flex min-w-0 flex-col">
         <span className="truncate text-sm font-bold">{profile.name}</span>
         <span className="text-xs text-sidebar-foreground">
@@ -33,10 +36,15 @@ export async function AccountAvatar() {
   if (!profile) return null;
 
   return (
-    <span className="flex size-11 items-center justify-center rounded-full bg-navy text-sm font-bold text-white">
-      <span aria-hidden>{initials(profile.name)}</span>
+    <Avatar className="flex size-11 items-center justify-center rounded-full bg-navy text-sm font-bold text-white">
+      <AvatarFallback
+        aria-hidden
+        className="bg-transparent font-bold text-inherit"
+      >
+        {initials(profile.name)}
+      </AvatarFallback>
       <span className="sr-only">Signed in as {profile.name}</span>
-    </span>
+    </Avatar>
   );
 }
 

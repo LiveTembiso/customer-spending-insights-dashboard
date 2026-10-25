@@ -1,3 +1,12 @@
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+  CardContent,
+} from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -22,39 +31,47 @@ export function SectionCard({
   children,
 }: SectionCardProps) {
   return (
-    <section
+    <Card
+      role="region"
       aria-labelledby={id}
       className={cn(
         "flex min-w-0 flex-col gap-4 rounded-[22px] bg-card p-5 sm:p-6",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-2">
+      <CardHeader className="flex items-start justify-between gap-2 p-0">
         <div className="flex flex-col">
-          <h2 id={id} className="text-lg font-bold">
-            {title}
-          </h2>
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
+          <CardTitle>
+            <h2 id={id} className="text-lg font-bold">
+              {title}
+            </h2>
+          </CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
         </div>
         {link && (
-          <Link
-            href={link.href}
-            className="-my-2.5 py-3 text-sm font-bold text-primary hover:text-primary-hover"
-          >
-            {link.label}
-            {link.context && (
-              <>
-                {" "}
-                <span className="sr-only">{link.context}</span>
-              </>
-            )}
-          </Link>
+          <CardAction>
+            <Link
+              href={link.href}
+              className={cn(
+                buttonVariants({ variant: "link" }),
+                "-my-2.5 h-11 px-0 py-3 text-sm font-bold text-primary hover:text-primary-hover",
+              )}
+            >
+              {link.label}
+              {link.context && (
+                <>
+                  {" "}
+                  <span className="sr-only">{link.context}</span>
+                </>
+              )}
+            </Link>
+          </CardAction>
         )}
-      </div>
-      {children}
-    </section>
+      </CardHeader>
+      <CardContent className="flex min-w-0 flex-col gap-4 p-0">
+        {children}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -66,7 +83,7 @@ export function SectionCardSkeleton({
   lines?: number;
 }) {
   return (
-    <div
+    <Card
       className={cn(
         "flex flex-col gap-4 rounded-[22px] bg-card p-5 sm:p-6",
         className,
@@ -76,6 +93,6 @@ export function SectionCardSkeleton({
       {Array.from({ length: lines }, (_, index) => (
         <Skeleton key={index} className="h-5 w-full" />
       ))}
-    </div>
+    </Card>
   );
 }

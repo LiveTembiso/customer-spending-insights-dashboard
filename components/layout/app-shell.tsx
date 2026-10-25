@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { MobileHeader } from "./mobile-header";
 import type { NavBadges } from "./nav-items";
@@ -21,7 +22,10 @@ export function AppShell({
   badges,
 }: AppShellProps) {
   return (
-    <div className="min-h-dvh md:grid md:grid-cols-[15rem_minmax(0,1fr)]">
+    <SidebarProvider
+      style={{ "--sidebar-width": "15rem" } as CSSProperties}
+      className="block min-h-dvh md:grid md:grid-cols-[15rem_minmax(0,1fr)]"
+    >
       <a
         href="#main"
         className="sr-only z-50 rounded-lg bg-card px-4 py-3 font-semibold focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
@@ -40,6 +44,6 @@ export function AppShell({
         </main>
       </div>
       <TabBar badges={badges} />
-    </div>
+    </SidebarProvider>
   );
 }

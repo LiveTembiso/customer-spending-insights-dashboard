@@ -2,12 +2,17 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { NavLink } from "./nav-link";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const pathname = vi.hoisted(() => ({ current: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathname.current }));
 
 function renderLink(href: string) {
-  render(<NavLink href={href} label="Link" icon={null} variant="sidebar" />);
+  render(
+    <SidebarProvider>
+      <NavLink href={href} label="Link" icon={null} variant="sidebar" />
+    </SidebarProvider>,
+  );
   return screen.getByRole("link", { name: "Link" });
 }
 
@@ -31,13 +36,15 @@ describe("NavLink", () => {
   it("includes the badge in the link's accessible name", () => {
     pathname.current = "/";
     render(
-      <NavLink
-        href="/goals"
-        label="Goals"
-        icon={null}
-        variant="sidebar"
-        badge={<span className="sr-only">, 2 goals need attention</span>}
-      />,
+      <SidebarProvider>
+        <NavLink
+          href="/goals"
+          label="Goals"
+          icon={null}
+          variant="sidebar"
+          badge={<span className="sr-only">, 2 goals need attention</span>}
+        />
+      </SidebarProvider>,
     );
 
     expect(
