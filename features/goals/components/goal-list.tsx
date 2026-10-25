@@ -2,10 +2,10 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { SectionCard } from "@/components/layout/section-card";
+import { purchasesHref } from "@/features/transactions/links";
 import type { DayKey } from "@/lib/dates";
 import { formatRands } from "@/lib/format";
 
-import { purchasesHref } from "../links";
 import type { Goal } from "../schemas";
 import { GoalIcon, PaceBar, remaining, StatusPill } from "./goal-parts";
 

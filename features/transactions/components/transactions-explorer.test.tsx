@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   fireEvent,
   render,
@@ -15,6 +14,12 @@ import { CATEGORIES } from "@/features/categories/catalogue";
 import { goalsQuery } from "@/features/goals/api";
 import type { Goal } from "@/features/goals/schemas";
 import { categoriesQuery } from "@/features/spending/api";
+import { installDialogMock } from "@/test-utils/dialog";
+import { makeGoal, makeTransaction } from "@/test-utils/fixtures";
+import {
+  createQueryWrapper,
+  createTestQueryClient,
+} from "@/test-utils/query-client";
 
 import { transactionsQuery } from "../api";
 import { parseFilters, toTotalsQuery, toTransactionsQuery } from "../filters";
@@ -26,27 +31,15 @@ vi.mock("next/navigation", () => ({ useSearchParams: vi.fn() }));
 const CUSTOMER = "12345";
 const TODAY = "2026-10-20";
 
-const transaction: Transaction = {
-  id: "txn_001",
-  date: "2026-10-20T06:14:00Z",
-  merchant: "Pick n Pay",
-  category: "Groceries",
-  amount: 245.8,
-  description: "Weekly groceries",
-  paymentMethod: "Credit Card",
-  icon: "shopping-cart",
-  categoryColor: "#FF6B6B",
-};
+const transaction: Transaction = makeTransaction();
 
-const goal: Goal = {
-  id: "goal_001",
-  category: "Groceries",
+const goal: Goal = makeGoal({
   monthlyBudget: 5500,
   currentSpent: 5318,
   percentageUsed: 96.7,
   daysRemaining: 12,
   status: "warning",
-};
+});
 
 let wideScreen = false;
 
@@ -64,9 +57,7 @@ function renderExplorer(
   { total = transactions?.length ?? 0, totals = true } = {},
 ) {
   const filters = setUrl(search);
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-  });
+  const client = createTestQueryClient();
 
   if (transactions) {
     const query = toTransactionsQuery(filters, TODAY);
@@ -108,11 +99,9 @@ function renderExplorer(
   client.setQueryData(goalsQuery(CUSTOMER).queryKey, { goals: [goal] });
 
   const tree = () => (
-    <QueryClientProvider client={client}>
-      <TransactionsExplorer customerId={CUSTOMER} today={TODAY} />
-    </QueryClientProvider>
+    <TransactionsExplorer customerId={CUSTOMER} today={TODAY} />
   );
-  const { rerender } = render(tree());
+  const { rerender } = render(tree(), { wrapper: createQueryWrapper(client) });
   return {
     /** Follows a URL change the way Next does after pushState. */
     navigateTo(next: string) {
@@ -134,13 +123,7 @@ beforeEach(() => {
     })),
   );
   // jsdom has no modal dialogs.
-  HTMLDialogElement.prototype.showModal = function () {
-    this.open = true;
-  };
-  HTMLDialogElement.prototype.close = function () {
-    this.open = false;
-    this.dispatchEvent(new Event("close"));
-  };
+  installDialogMock();
 });
 
 afterEach(() => {

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { addDays, type DayKey, toDayKey } from "@/lib/dates";
+import { addDays, DAY_MS, type DayKey, toDayKey } from "@/lib/dates";
 import {
   type DayRange,
   PERIOD_DAYS,
@@ -19,8 +19,6 @@ export function previousPeriodRange(period: Period, now: Date): DayRange {
   const end = addDays(current.start, -1);
   return { start: addDays(end, 1 - PERIOD_DAYS[period]), end };
 }
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 // The current period is only partly over, so the previous one is cut off at
 // the same time of day: exactly one period length before now.

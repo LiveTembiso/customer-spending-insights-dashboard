@@ -6,12 +6,12 @@ import {
 } from "@/features/categories/schemas";
 import type { CategoriesQuery } from "@/features/spending/schemas";
 import type { DayKey } from "@/lib/dates";
-import { type DayRange, periodRange } from "@/lib/periods";
+import { DEFAULT_PERIOD, type DayRange, periodRange } from "@/lib/periods";
 import { isoDateSchema, type Period, periodSchema } from "@/lib/schemas";
+import { type ParamSource, readSearchParam } from "@/lib/search-params";
 
+import { MAX_SEARCH_LENGTH, PAGE_SIZE } from "./constants";
 import { type SortBy, sortBySchema, type TransactionsQuery } from "./schemas";
-
-export const PAGE_SIZE = 10;
 
 export const SORT_LABELS: Record<SortBy, string> = {
   date_desc: "Newest first",
@@ -32,22 +32,11 @@ export interface TransactionFilters {
   page: number;
 }
 
-const DEFAULT_PERIOD: Period = "30d";
-
 export const DEFAULT_FILTERS: TransactionFilters = {
   period: DEFAULT_PERIOD,
   sortBy: "date_desc",
   page: 1,
 };
-
-type ParamSource =
-  URLSearchParams | Record<string, string | string[] | undefined>;
-
-function read(source: ParamSource, key: string): string | undefined {
-  if (source instanceof URLSearchParams) return source.get(key) ?? undefined;
-  const value = source[key];
-  return Array.isArray(value) ? value[0] : value;
-}
 
 const pageSchema = z.coerce.number().int().min(1).catch(1);
 
@@ -56,10 +45,10 @@ export const EARLIEST_DAY: DayKey = "2000-01-01";
 
 // Values that don't parse fall back to defaults, so an edited link still opens.
 export function parseFilters(source: ParamSource): TransactionFilters {
-  const from = isoDateSchema.safeParse(read(source, "from")).data;
-  const to = isoDateSchema.safeParse(read(source, "to")).data;
+  const from = isoDateSchema.safeParse(readSearchParam(source, "from")).data;
+  const to = isoDateSchema.safeParse(readSearchParam(source, "to")).data;
   const custom =
-    read(source, "period") === "custom" &&
+    readSearchParam(source, "period") === "custom" &&
     from &&
     to &&
     from >= EARLIEST_DAY &&
@@ -68,14 +57,20 @@ export function parseFilters(source: ParamSource): TransactionFilters {
       : undefined;
 
   return {
-    q: read(source, "q")?.trim().slice(0, 100) || undefined,
-    category: categoryNameSchema.safeParse(read(source, "category")).data,
+    q:
+      readSearchParam(source, "q")?.trim().slice(0, MAX_SEARCH_LENGTH) ||
+      undefined,
+    category: categoryNameSchema.safeParse(readSearchParam(source, "category"))
+      .data,
     period: custom
       ? "custom"
-      : (periodSchema.safeParse(read(source, "period")).data ?? DEFAULT_PERIOD),
+      : (periodSchema.safeParse(readSearchParam(source, "period")).data ??
+        DEFAULT_PERIOD),
     range: custom,
-    sortBy: sortBySchema.safeParse(read(source, "sort")).data ?? "date_desc",
-    page: pageSchema.parse(read(source, "page")),
+    sortBy:
+      sortBySchema.safeParse(readSearchParam(source, "sort")).data ??
+      "date_desc",
+    page: pageSchema.parse(readSearchParam(source, "page")),
   };
 }
 

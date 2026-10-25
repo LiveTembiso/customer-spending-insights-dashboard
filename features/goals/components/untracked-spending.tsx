@@ -3,9 +3,9 @@ import Link from "next/link";
 
 import { SectionCard } from "@/components/layout/section-card";
 import { CategoryIcon } from "@/features/categories/components/category-icon";
+import { purchasesHref } from "@/features/transactions/links";
 import { formatDayRange, formatRands } from "@/lib/format";
 
-import { purchasesHref } from "../links";
 import { getCurrentUntrackedSpending } from "../server/current";
 
 export async function UntrackedSpending() {

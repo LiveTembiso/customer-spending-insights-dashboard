@@ -1,11 +1,16 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { goalsQuery } from "@/features/goals/api";
 import type { Goal } from "@/features/goals/schemas";
+import { makeGoal } from "@/test-utils/fixtures";
+import {
+  createQueryWrapper,
+  createTestQueryClient,
+} from "@/test-utils/query-client";
+import { normalizedText as text } from "@/test-utils/text";
 
 import { categoriesQuery, summaryQuery, trendsQuery } from "../api";
 import type {
@@ -70,17 +75,13 @@ const trends: TrendsResponse = {
   })),
 };
 
-const goal: Goal = {
-  id: "goal_001",
-  category: "Groceries",
+const goal: Goal = makeGoal({
   monthlyBudget: 5500,
   currentSpent: 5318,
   percentageUsed: 96.7,
   daysRemaining: 7,
   status: "warning",
-};
-
-const text = (element: HTMLElement) => element.textContent?.replace(/\s/g, " ");
+});
 
 function setUrl(search: string) {
   window.history.replaceState(null, "", search ? `?${search}` : "/");
@@ -101,9 +102,7 @@ function renderExplorer(
   } = { summary, categories, trends },
 ) {
   const { period, months } = setUrl(search);
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-  });
+  const client = createTestQueryClient();
   if (data.summary) {
     client.setQueryData(
       summaryQuery(CUSTOMER, { period }).queryKey,
@@ -124,9 +123,7 @@ function renderExplorer(
   }
   client.setQueryData(goalsQuery(CUSTOMER).queryKey, { goals: [goal] });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={client}>{children}</QueryClientProvider>
-  );
+  const wrapper = createQueryWrapper(client);
   return render(<InsightsExplorer customerId={CUSTOMER} />, { wrapper });
 }
 
@@ -241,14 +238,37 @@ describe("InsightsExplorer", () => {
     expect(text(latestFull)).toContain("5.0% above average");
   });
 
-  it("offers a retry when the summary can't load", async () => {
-    failingFetch();
-    renderExplorer("", { categories, trends });
-    expect(
-      await screen.findByText("We couldn't load your spending summary."),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
-  });
+  it.each([
+    { key: "summary", message: "your spending summary", response: summary },
+    {
+      key: "categories",
+      message: "your spending by category",
+      response: categories,
+    },
+    { key: "trends", message: "your monthly spending", response: trends },
+  ] as const)(
+    "recovers $key after retrying its failed request",
+    async ({ key, message, response }) => {
+      failingFetch();
+      const data: {
+        summary?: SummaryResponse;
+        categories?: CategoriesResponse;
+        trends?: TrendsResponse;
+      } = { summary, categories, trends };
+      delete data[key];
+      renderExplorer("", data);
+      const error = `We couldn't load ${message}.`;
+      expect(await screen.findByText(error)).toBeVisible();
+      vi.mocked(fetch).mockResolvedValueOnce(
+        new Response(JSON.stringify(response)),
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+      await waitFor(() =>
+        expect(screen.queryByText(error)).not.toBeInTheDocument(),
+      );
+      expect(fetch).toHaveBeenCalledTimes(2);
+    },
+  );
 
   it("still points things out when the monthly figures can't load", async () => {
     failingFetch();

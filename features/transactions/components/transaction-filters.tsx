@@ -10,6 +10,7 @@ import type { DayKey } from "@/lib/dates";
 import { formatDay } from "@/lib/format";
 import { cn, pressedInForcedColors } from "@/lib/utils";
 
+import { MAX_SEARCH_LENGTH } from "../constants";
 import {
   EARLIEST_DAY,
   filtersRange,
@@ -146,7 +147,7 @@ function SearchField({
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Merchant or description"
-          maxLength={100}
+          maxLength={MAX_SEARCH_LENGTH}
           autoComplete="off"
           className={cn(
             control,

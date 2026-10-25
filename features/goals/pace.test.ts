@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { makeGoal } from "@/test-utils/fixtures";
+
 import {
   byUrgency,
   goalPace,
@@ -8,16 +10,8 @@ import {
 } from "./pace";
 import type { Goal } from "./schemas";
 
-const goal = (overrides: Partial<Goal>): Goal => ({
-  id: "goal_001",
-  category: "Groceries",
-  monthlyBudget: 1000,
-  currentSpent: 400,
-  percentageUsed: 40,
-  daysRemaining: 10,
-  status: "on_track",
-  ...overrides,
-});
+const goal = (overrides: Partial<Goal>): Goal =>
+  makeGoal({ currentSpent: 400, percentageUsed: 40, ...overrides });
 
 describe("monthElapsedPercent", () => {
   it("starts the month at midnight in SAST", () => {

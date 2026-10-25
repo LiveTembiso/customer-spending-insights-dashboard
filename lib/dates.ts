@@ -1,5 +1,5 @@
 const SAST_OFFSET_MS = 2 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type DayKey = string;
 

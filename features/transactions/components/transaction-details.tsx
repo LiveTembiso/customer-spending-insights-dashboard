@@ -1,47 +1,18 @@
 "use client";
 
-import { CircleAlert, CircleCheck, TriangleAlert, X } from "lucide-react";
+import { X } from "lucide-react";
 import Link from "next/link";
 import { type RefObject, useEffect, useRef } from "react";
 
 import { CategoryDot } from "@/features/categories/components/category-dot";
 import type { Goal } from "@/features/goals/schemas";
+import { GOAL_STATUS } from "@/features/goals/status";
 import { type DayKey, toDayKey, toMonthKey, toTimeOfDay } from "@/lib/dates";
 import { formatDay, formatPercent, formatRands } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { Transaction } from "../schemas";
 import { debit, MerchantAvatar } from "./transaction-parts";
-
-const GOAL_TONE = {
-  on_track: {
-    label: "On track",
-    icon: CircleCheck,
-    box: "border-transparent bg-success-surface",
-    title: "text-success-foreground",
-    text: "text-success-foreground",
-    track: "bg-card",
-    bar: "bg-success",
-  },
-  warning: {
-    label: "Warning",
-    icon: TriangleAlert,
-    box: "border-warning-border bg-warning-surface",
-    title: "text-warning-foreground",
-    text: "text-warning-muted",
-    track: "bg-warning-track",
-    bar: "bg-warning",
-  },
-  exceeded: {
-    label: "Over budget",
-    icon: CircleAlert,
-    box: "border-warning-border bg-warning-surface",
-    title: "text-warning-foreground",
-    text: "text-warning-muted",
-    track: "bg-warning-track",
-    bar: "bg-warning",
-  },
-} as const;
 
 /** The goal a purchase counts towards: same category, this month. */
 export function goalFor(
@@ -127,8 +98,9 @@ function TransactionDetails({
 }
 
 function GoalImpact({ goal, amount }: { goal: Goal; amount: number }) {
-  const tone = GOAL_TONE[goal.status];
-  const Icon = tone.icon;
+  const status = GOAL_STATUS[goal.status];
+  const tone = status.detail;
+  const Icon = status.icon;
   const used = Math.round(goal.percentageUsed);
   const category = goal.category.toLowerCase();
 
@@ -150,7 +122,7 @@ function GoalImpact({ goal, amount }: { goal: Goal; amount: number }) {
         >
           <Icon aria-hidden className="size-4" />
           {goal.category} goal · {used}% used
-          <span className="sr-only">, {tone.label.toLowerCase()}</span>
+          <span className="sr-only">, {status.label.toLowerCase()}</span>
         </h3>
         <div
           role="img"
@@ -161,7 +133,7 @@ function GoalImpact({ goal, amount }: { goal: Goal; amount: number }) {
           )}
         >
           <div
-            className={cn("h-full rounded-full", tone.bar)}
+            className={cn("h-full rounded-full", status.bar)}
             style={{ width: `${Math.min(goal.percentageUsed, 100)}%` }}
           />
         </div>

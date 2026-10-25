@@ -1,9 +1,9 @@
 import Link from "next/link";
 
+import { purchasesHref } from "@/features/transactions/links";
 import type { DayKey } from "@/lib/dates";
 import { formatRands } from "@/lib/format";
 
-import { purchasesHref } from "../links";
 import { goalPace } from "../pace";
 import type { Goal } from "../schemas";
 import {

@@ -21,6 +21,7 @@ export default defineConfig({
         "**/*.d.ts",
         "**/*.test.{ts,tsx}",
         "vitest.setup.ts",
+        "test-utils/**",
         "e2e/**",
         ".next/**",
       ],

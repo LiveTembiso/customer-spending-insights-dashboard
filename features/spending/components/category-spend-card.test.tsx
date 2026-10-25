@@ -1,6 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { makeCategorySpend } from "@/test-utils/fixtures";
+import { normalizedText as text } from "@/test-utils/text";
+
 import type { CategoriesResponse, CategorySpend } from "../schemas";
 import { CategorySpendCard } from "./category-spend-card";
 
@@ -9,22 +12,14 @@ const category = (
   amount: number,
   transactionCount: number,
   percentage: number,
-): CategorySpend => ({
-  name,
-  amount,
-  percentage,
-  transactionCount,
-  color: "#FF6B6B",
-  icon: "shopping-cart",
-});
+): CategorySpend =>
+  makeCategorySpend({ name, amount, percentage, transactionCount });
 
 const breakdown = (categories: CategorySpend[]): CategoriesResponse => ({
   dateRange: { startDate: "2026-09-25", endDate: "2026-10-24" },
   totalAmount: categories.reduce((sum, c) => sum + c.amount, 0),
   categories,
 });
-
-const text = (element: Element) => element.textContent?.replace(/\s/g, " ");
 
 function renderCard(data?: CategoriesResponse, stale = false) {
   return render(

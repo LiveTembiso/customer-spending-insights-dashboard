@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { getCurrentMonthCategories } from "@/features/spending/server/current";
+import { makeGoal as goal } from "@/test-utils/fixtures";
 
-import type { Goal } from "../schemas";
 import {
   getCurrentGoalsProgress,
   getCurrentUntrackedSpending,
@@ -14,17 +14,6 @@ vi.mock("./repository", () => ({ getGoals: vi.fn() }));
 vi.mock("@/features/spending/server/current", () => ({
   getCurrentMonthCategories: vi.fn(),
 }));
-
-const goal = (overrides: Partial<Goal>): Goal => ({
-  id: "goal_001",
-  category: "Groceries",
-  monthlyBudget: 1000,
-  currentSpent: 500,
-  percentageUsed: 50,
-  daysRemaining: 10,
-  status: "on_track",
-  ...overrides,
-});
 
 const spend = (
   name: "Groceries" | "Transportation" | "Shopping",

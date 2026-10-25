@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { fetchAllTransactions } from "./export";
+import { makeTransaction } from "@/test-utils/fixtures";
+
+import { downloadCsv, fetchAllTransactions } from "./export";
 import type { Transaction, TransactionsQuery } from "./schemas";
 
 const query: TransactionsQuery = {
@@ -11,17 +13,12 @@ const query: TransactionsQuery = {
   q: undefined,
 };
 
-const transaction = (id: number): Transaction => ({
-  id: `txn_${id}`,
-  date: "2026-10-16T22:30:00Z",
-  merchant: "Pick n Pay",
-  category: "Groceries",
-  amount: 10,
-  description: "Weekly groceries",
-  paymentMethod: "Credit Card",
-  icon: "shopping-cart",
-  categoryColor: "#FF6B6B",
-});
+const transaction = (id: number): Transaction =>
+  makeTransaction({
+    id: `txn_${id}`,
+    date: "2026-10-16T22:30:00Z",
+    amount: 10,
+  });
 
 function page(from: number, count: number, total: number) {
   return new Response(
@@ -43,6 +40,42 @@ const offsets = (fetch: ReturnType<typeof vi.fn>) =>
   fetch.mock.calls.map(([url]) =>
     new URL(String(url), "http://test").searchParams.get("offset"),
   );
+
+describe("downloadCsv", () => {
+  it("downloads a UTF-8 CSV, removes the temporary link and releases its URL", () => {
+    const createObjectURL = vi.fn<(blob: Blob) => string>(
+      () => "blob:transactions",
+    );
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal(
+      "URL",
+      class extends URL {
+        static createObjectURL = createObjectURL;
+        static revokeObjectURL = revokeObjectURL;
+      },
+    );
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {});
+    vi.useFakeTimers();
+    try {
+      downloadCsv([transaction(1)], "purchases.csv");
+      expect(createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+      expect(createObjectURL.mock.calls[0][0].type).toBe(
+        "text/csv;charset=utf-8",
+      );
+      const link = click.mock.contexts[0] as HTMLAnchorElement;
+      expect(link.href).toBe("blob:transactions");
+      expect(link.download).toBe("purchases.csv");
+      expect(link.isConnected).toBe(false);
+      expect(revokeObjectURL).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(10_000);
+      expect(revokeObjectURL).toHaveBeenCalledWith("blob:transactions");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
 
 afterEach(() => {
   vi.unstubAllGlobals();

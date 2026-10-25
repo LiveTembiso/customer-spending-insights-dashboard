@@ -1,22 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { makeGoal as goal } from "@/test-utils/fixtures";
+
 import type { Goal } from "../schemas";
 import { getCurrentGoalsProgress } from "../server/current";
 import { GoalsCard } from "./goals-card";
 
 vi.mock("../server/current", () => ({ getCurrentGoalsProgress: vi.fn() }));
-
-const goal = (overrides: Partial<Goal>): Goal => ({
-  id: "goal_001",
-  category: "Groceries",
-  monthlyBudget: 1000,
-  currentSpent: 500,
-  percentageUsed: 50,
-  daysRemaining: 10,
-  status: "on_track",
-  ...overrides,
-});
 
 async function renderCard(goals: Goal[]) {
   vi.mocked(getCurrentGoalsProgress).mockResolvedValue({

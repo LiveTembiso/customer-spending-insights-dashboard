@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { makeCategorySpend } from "@/test-utils/fixtures";
+
 import type { CategoriesResponse, CategorySpend } from "../schemas";
 import { getCurrentMonthCategories } from "../server/current";
 import { CategoryBreakdownCard } from "./category-breakdown-card";
@@ -11,14 +13,13 @@ const category = (
   name: CategorySpend["name"],
   amount: number,
   percentage: number,
-): CategorySpend => ({
-  name,
-  amount,
-  percentage,
-  transactionCount: amount > 0 ? 3 : 0,
-  color: "#FF6B6B",
-  icon: "shopping-cart",
-});
+): CategorySpend =>
+  makeCategorySpend({
+    name,
+    amount,
+    percentage,
+    transactionCount: amount > 0 ? 3 : 0,
+  });
 
 async function renderCard(categories: CategorySpend[]) {
   const response: CategoriesResponse = {

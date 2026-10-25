@@ -4,6 +4,18 @@ export const isoDateSchema = z.iso.date();
 
 export const isoDateTimeSchema = z.iso.datetime();
 
+/** Open-ended ranges are allowed; endpoints can additionally require both dates. */
+export const dateRangeQuerySchema = z
+  .object({
+    startDate: isoDateSchema.optional(),
+    endDate: isoDateSchema.optional(),
+  })
+  .refine(
+    ({ startDate, endDate }) =>
+      startDate === undefined || endDate === undefined || startDate <= endDate,
+    { message: "startDate must not be after endDate", path: ["endDate"] },
+  );
+
 export const monthSchema = z
   .string()
   .regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Expected a month as YYYY-MM");

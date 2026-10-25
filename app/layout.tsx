@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
-import "./globals.css";
+import { APP_DESCRIPTION, APP_NAME, THEME_COLOR } from "@/lib/brand";
 
+import "./globals.css";
 import { Providers } from "./providers";
 
 const sans = Plus_Jakarta_Sans({
@@ -12,15 +13,14 @@ const sans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s · Spending Insights",
-    default: "Spending Insights",
+    template: `%s · ${APP_NAME}`,
+    default: APP_NAME,
   },
-  description:
-    "See where your money goes, spot trends and keep your budgets on track.",
+  description: APP_DESCRIPTION,
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0e1b2c",
+  themeColor: THEME_COLOR,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

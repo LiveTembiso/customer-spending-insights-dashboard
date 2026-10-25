@@ -1,16 +1,15 @@
 import "server-only";
 
 import { findCustomer } from "@/features/profile/server/customers";
+import { PERIOD_LABELS } from "@/lib/periods";
+import { PERIODS } from "@/lib/schemas";
 
 import { CATEGORIES } from "../catalogue";
 import type { FiltersResponse } from "../schemas";
 
-const DATE_RANGE_PRESETS: FiltersResponse["dateRangePresets"] = [
-  { label: "Last 7 days", value: "7d" },
-  { label: "Last 30 days", value: "30d" },
-  { label: "Last 90 days", value: "90d" },
-  { label: "Last year", value: "1y" },
-];
+const DATE_RANGE_PRESETS: FiltersResponse["dateRangePresets"] = PERIODS.map(
+  (value) => ({ label: PERIOD_LABELS[value].current, value }),
+);
 
 export function getFilters(customerId: string): FiltersResponse | undefined {
   if (!findCustomer(customerId)) return undefined;

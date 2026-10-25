@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 
 import { expect, type Page, test } from "@playwright/test";
 
+import { expectCategorySelected } from "./helpers/transactions";
+
 const visibleRowButtons = (page: Page) =>
   page
     .getByRole("region", { name: /All categories|Groceries/ })
@@ -30,19 +32,7 @@ test.describe("transactions", () => {
     ).toBeVisible();
 
     await page.reload();
-    if (isMobile) {
-      await expect(
-        page.getByRole("combobox", { name: "Category" }),
-      ).toHaveValue("Groceries");
-    } else {
-      await expect(
-        page.getByRole("button", {
-          name: "Groceries",
-          exact: true,
-          pressed: true,
-        }),
-      ).toBeVisible();
-    }
+    await expectCategorySelected(page, "Groceries", isMobile);
   });
 
   test("changes the period", async ({ page }) => {

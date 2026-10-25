@@ -1,13 +1,12 @@
 import { apiGet, customerPath } from "@/lib/api/client";
 
+import { MAX_PAGE_SIZE } from "./constants";
 import { toCsv } from "./csv";
 import {
   type Transaction,
   type TransactionsQuery,
   transactionsResponseSchema,
 } from "./schemas";
-
-const BATCH_SIZE = 100;
 
 /** Every transaction matching `query`, across all pages. Browser only. */
 export async function fetchAllTransactions(
@@ -16,11 +15,11 @@ export async function fetchAllTransactions(
   signal?: AbortSignal,
 ): Promise<Transaction[]> {
   const all: Transaction[] = [];
-  for (let offset = 0; ; offset += BATCH_SIZE) {
+  for (let offset = 0; ; offset += MAX_PAGE_SIZE) {
     const page = await apiGet(
       customerPath(customerId, "transactions"),
       transactionsResponseSchema,
-      { query: { ...query, limit: BATCH_SIZE, offset }, signal },
+      { query: { ...query, limit: MAX_PAGE_SIZE, offset }, signal },
     );
     all.push(...page.transactions);
     if (!page.pagination.hasMore || page.transactions.length === 0) {

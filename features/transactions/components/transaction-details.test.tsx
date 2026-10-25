@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Goal } from "@/features/goals/schemas";
+import { installDialogMock } from "@/test-utils/dialog";
+import { makeGoal, makeTransaction } from "@/test-utils/fixtures";
 
 import type { Transaction } from "../schemas";
 import {
@@ -10,27 +12,11 @@ import {
   TransactionDetailsPanel,
 } from "./transaction-details";
 
-const transaction: Transaction = {
-  id: "txn_001",
-  date: "2026-10-20T06:14:00Z",
-  merchant: "Pick n Pay",
-  category: "Groceries",
-  amount: 245.8,
-  description: "Weekly groceries",
-  paymentMethod: "Credit Card",
-  icon: "shopping-cart",
-  categoryColor: "#FF6B6B",
-};
+const transaction: Transaction = makeTransaction();
 
 beforeEach(() => {
   // jsdom doesn't implement native modal opening and closing.
-  HTMLDialogElement.prototype.showModal = function () {
-    this.open = true;
-  };
-  HTMLDialogElement.prototype.close = function () {
-    this.open = false;
-    this.dispatchEvent(new Event("close"));
-  };
+  installDialogMock();
 });
 
 describe("TransactionDetailsDialog", () => {
@@ -95,15 +81,11 @@ describe("TransactionDetailsPanel", () => {
   it.each(["on_track", "exceeded"] as const)(
     "describes the goal impact for %s budgets",
     (status) => {
-      const goal: Goal = {
-        id: "goal_001",
-        category: "Groceries",
-        monthlyBudget: 1000,
+      const goal: Goal = makeGoal({
         currentSpent: status === "exceeded" ? 1120 : 500,
         percentageUsed: status === "exceeded" ? 112 : 50,
-        daysRemaining: 10,
         status,
-      };
+      });
       render(
         <TransactionDetailsPanel
           id="details"

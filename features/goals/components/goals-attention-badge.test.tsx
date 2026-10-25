@@ -1,21 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { makeGoal } from "@/test-utils/fixtures";
+
 import type { Goal, GoalStatus } from "../schemas";
 import { getCurrentGoals } from "../server/current";
 import { GoalsAttentionBadge } from "./goals-attention-badge";
 
 vi.mock("../server/current", () => ({ getCurrentGoals: vi.fn() }));
 
-const goal = (status: GoalStatus): Goal => ({
-  id: `goal_${status}`,
-  category: "Groceries",
-  monthlyBudget: 1000,
-  currentSpent: 500,
-  percentageUsed: 50,
-  daysRemaining: 10,
-  status,
-});
+const goal = (status: GoalStatus): Goal =>
+  makeGoal({ id: `goal_${status}`, status });
 
 async function renderBadge(statuses: GoalStatus[]) {
   vi.mocked(getCurrentGoals).mockResolvedValue({ goals: statuses.map(goal) });

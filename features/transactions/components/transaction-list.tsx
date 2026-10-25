@@ -8,7 +8,7 @@ import { type DayKey, toDayKey, toTimeOfDay } from "@/lib/dates";
 import { formatDay, formatDayHeading } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-import { PAGE_SIZE } from "../filters";
+import { PAGE_SIZE } from "../constants";
 import type {
   Pagination as PaginationData,
   SortBy,

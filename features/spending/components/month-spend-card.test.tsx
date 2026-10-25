@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { MonthToDate } from "../server/repository";
+import { normalizedText as text } from "@/test-utils/text";
+
 import { getCurrentMonthToDate } from "../server/current";
+import type { MonthToDate } from "../server/repository";
 import { MonthSpendCard } from "./month-spend-card";
 
 vi.mock("../server/current", () => ({ getCurrentMonthToDate: vi.fn() }));
@@ -19,8 +21,6 @@ async function renderCard(data: MonthToDate | undefined) {
   vi.mocked(getCurrentMonthToDate).mockResolvedValue(data);
   return render(await MonthSpendCard());
 }
-
-const text = (element: HTMLElement) => element.textContent?.replace(/\s/g, " ");
 
 describe("MonthSpendCard", () => {
   it("shows this month's total and transaction count", async () => {

@@ -7,6 +7,13 @@ import {
 
 import type { GoalStatus } from "./schemas";
 
+const WARNING_DETAIL = {
+  box: "border-warning-border bg-warning-surface",
+  title: "text-warning-foreground",
+  text: "text-warning-muted",
+  track: "bg-warning-track",
+};
+
 export const GOAL_STATUS: Record<
   GoalStatus,
   {
@@ -15,6 +22,7 @@ export const GOAL_STATUS: Record<
     pill: string;
     bar: string;
     track: string;
+    detail: { box: string; title: string; text: string; track: string };
   }
 > = {
   on_track: {
@@ -23,6 +31,12 @@ export const GOAL_STATUS: Record<
     pill: "bg-success-surface text-success-foreground",
     bar: "bg-success",
     track: "bg-background",
+    detail: {
+      box: "border-transparent bg-success-surface",
+      title: "text-success-foreground",
+      text: "text-success-foreground",
+      track: "bg-card",
+    },
   },
   warning: {
     label: "Warning",
@@ -30,6 +44,7 @@ export const GOAL_STATUS: Record<
     pill: "bg-warning-track text-warning-foreground",
     bar: "bg-warning",
     track: "bg-warning-track",
+    detail: WARNING_DETAIL,
   },
   exceeded: {
     label: "Over budget",
@@ -37,5 +52,6 @@ export const GOAL_STATUS: Record<
     pill: "bg-warning-track text-warning-foreground",
     bar: "bg-warning",
     track: "bg-warning-track",
+    detail: WARNING_DETAIL,
   },
 };

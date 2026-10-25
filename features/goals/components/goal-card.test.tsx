@@ -1,19 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { makeWarningGoal as goal } from "@/test-utils/fixtures";
+import { normalizedText as text } from "@/test-utils/text";
+
 import type { Goal } from "../schemas";
 import { GoalCard } from "./goal-card";
-
-const goal = (overrides: Partial<Goal>): Goal => ({
-  id: "goal_001",
-  category: "Groceries",
-  monthlyBudget: 5500,
-  currentSpent: 4473.12,
-  percentageUsed: 81.3,
-  daysRemaining: 11,
-  status: "warning",
-  ...overrides,
-});
 
 function renderCard(overrides: Partial<Goal> = {}, monthElapsed = 64.5) {
   return render(
@@ -26,7 +18,6 @@ function renderCard(overrides: Partial<Goal> = {}, monthElapsed = 64.5) {
 }
 
 const card = () => screen.getByRole("region");
-const text = (element: HTMLElement) => element.textContent?.replace(/\s/g, " ");
 
 describe("GoalCard", () => {
   it("says what's left and what that allows per day, rounded down", () => {

@@ -4,17 +4,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryDot } from "@/features/categories/components/category-dot";
 import { CategoryIcon } from "@/features/categories/components/category-icon";
 import { formatPercent, formatRands } from "@/lib/format";
+import { PERIOD_LABELS } from "@/lib/periods";
 import type { Period } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
 import type { CategoriesResponse, SummaryResponse } from "../schemas";
-
-const PREVIOUS: Record<Period, string> = {
-  "7d": "previous 7 days",
-  "30d": "previous 30 days",
-  "90d": "previous 90 days",
-  "1y": "previous year",
-};
 
 const tile =
   "flex min-w-0 flex-col gap-1 rounded-[18px] bg-card px-4 py-3.5 sm:gap-1.5 sm:px-5 sm:py-4.5";
@@ -86,7 +80,7 @@ export function InsightsSummary({
 
   return (
     <section
-      aria-label={`Compared with the ${PREVIOUS[period]}`}
+      aria-label={`Compared with the ${PERIOD_LABELS[period].previous}`}
       aria-busy={stale || undefined}
       className={cn(
         "grid grid-cols-2 gap-3 transition-opacity lg:grid-cols-3",
@@ -99,7 +93,7 @@ export function InsightsSummary({
         <Change
           change={spentChange}
           words={["more", "less"]}
-          previous={PREVIOUS[period]}
+          previous={PERIOD_LABELS[period].previous}
           colors={["text-warning-foreground", "text-primary"]}
         />
       </div>
@@ -109,7 +103,7 @@ export function InsightsSummary({
         <Change
           change={transactionChange}
           words={["more", "fewer"]}
-          previous={PREVIOUS[period]}
+          previous={PERIOD_LABELS[period].previous}
           colors={["text-muted-strong", "text-muted-strong"]}
         />
       </div>

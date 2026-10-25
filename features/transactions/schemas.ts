@@ -6,11 +6,13 @@ import {
 } from "@/features/categories/schemas";
 import {
   amountSchema,
+  dateRangeQuerySchema,
   hexColorSchema,
-  isoDateSchema,
   isoDateTimeSchema,
   queryIntSchema,
 } from "@/lib/schemas";
+
+import { MAX_PAGE_SIZE, MAX_SEARCH_LENGTH } from "./constants";
 
 export const SORT_OPTIONS = [
   "date_desc",
@@ -24,29 +26,19 @@ export const sortBySchema = z.enum(SORT_OPTIONS);
 export type SortBy = z.infer<typeof sortBySchema>;
 
 // GET /api/customers/{customerId}/transactions
-export const transactionsQuerySchema = z
-  .object({
-    limit: queryIntSchema.min(1).max(100).default(20),
-    offset: queryIntSchema.min(0).default(0),
-    category: categoryNameSchema.optional(),
-    startDate: isoDateSchema.optional(),
-    endDate: isoDateSchema.optional(),
-    sortBy: sortBySchema.default("date_desc"),
-    // A cleared search box sends `q=`; treat it as no search.
-    q: z
-      .string()
-      .trim()
-      .max(100)
-      .optional()
-      .transform((value) => value || undefined),
-  })
-  .refine(
-    (query) =>
-      query.startDate === undefined ||
-      query.endDate === undefined ||
-      query.startDate <= query.endDate,
-    { message: "startDate must not be after endDate", path: ["endDate"] },
-  );
+export const transactionsQuerySchema = dateRangeQuerySchema.safeExtend({
+  limit: queryIntSchema.min(1).max(MAX_PAGE_SIZE).default(20),
+  offset: queryIntSchema.min(0).default(0),
+  category: categoryNameSchema.optional(),
+  sortBy: sortBySchema.default("date_desc"),
+  // A cleared search box sends `q=`; treat it as no search.
+  q: z
+    .string()
+    .trim()
+    .max(MAX_SEARCH_LENGTH)
+    .optional()
+    .transform((value) => value || undefined),
+});
 
 export type TransactionsQuery = z.infer<typeof transactionsQuerySchema>;
 
@@ -66,7 +58,7 @@ export type Transaction = z.infer<typeof transactionSchema>;
 
 export const paginationSchema = z.object({
   total: z.int().nonnegative(),
-  limit: z.int().min(1).max(100),
+  limit: z.int().min(1).max(MAX_PAGE_SIZE),
   offset: z.int().nonnegative(),
   hasMore: z.boolean(),
 });

@@ -8,29 +8,18 @@ import { PageHeader } from "@/components/layout/page-header";
 import { goalsQuery } from "@/features/goals/api";
 import { formatDateRange } from "@/lib/format";
 import { navigate } from "@/lib/history";
+import { PERIOD_LABELS } from "@/lib/periods";
 import { type Period, PERIODS } from "@/lib/schemas";
 import { cn, pressedInForcedColors } from "@/lib/utils";
 
 import { categoriesQuery, summaryQuery, trendsQuery } from "../api";
 import { standOut } from "../insights";
-import {
-  type InsightsView,
-  parseView,
-  PERIOD_LABELS,
-  toSearchParams,
-} from "../view";
+import { type InsightsView, parseView, toSearchParams } from "../view";
 import { CategorySpendCard } from "./category-spend-card";
 import { InsightsSummary } from "./insights-summary";
 import { MonthTableCard } from "./month-table-card";
 import { SpendingChartCard } from "./spending-chart-card";
 import { StandOutCard } from "./stand-out-card";
-
-const LAST: Record<Period, string> = {
-  "7d": "Last 7 days",
-  "30d": "Last 30 days",
-  "90d": "Last 90 days",
-  "1y": "Last year",
-};
 
 function PeriodControl({
   period,
@@ -63,7 +52,7 @@ function PeriodControl({
                 : "font-semibold text-muted-strong hover:bg-background",
             )}
           >
-            {PERIOD_LABELS[value]}
+            {PERIOD_LABELS[value].short}
           </button>
         );
       })}
@@ -131,8 +120,8 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
     ? undefined
     : categories.data?.dateRange;
   const periodDescription = range
-    ? `${LAST[period]} · ${formatDateRange(range.startDate, range.endDate)}`
-    : LAST[period];
+    ? `${PERIOD_LABELS[period].current} · ${formatDateRange(range.startDate, range.endDate)}`
+    : PERIOD_LABELS[period].current;
 
   return (
     <>
@@ -195,7 +184,7 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
             <StandOutCard
               notes={notes}
               stale={categories.isPlaceholderData || trends.isPlaceholderData}
-              description={`Based on the ${LAST[period].toLowerCase()} and your recent months`}
+              description={`Based on the ${PERIOD_LABELS[period].current.toLowerCase()} and your recent months`}
             />
           </div>
         )}

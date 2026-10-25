@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { normalizedText as text } from "@/test-utils/text";
+
 import {
   BarTooltip,
   type MonthBar,
@@ -28,9 +30,6 @@ const bars = [
   bar("2026-09", 22279, "muted"),
   bar("2026-10", 18768, "striped"),
 ];
-
-const text = (element: Element | null) =>
-  element?.textContent?.replace(/\s/g, " ");
 
 describe("MonthlyBarChart", () => {
   it("describes itself and isn't a tab stop", () => {

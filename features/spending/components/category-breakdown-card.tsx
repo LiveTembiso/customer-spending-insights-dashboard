@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { SectionCard } from "@/components/layout/section-card";
 import { CategoryDot } from "@/features/categories/components/category-dot";
+import { purchasesHref } from "@/features/transactions/links";
 import { formatDayRange, formatRands } from "@/lib/format";
 
 import { getCurrentMonthCategories } from "../server/current";
@@ -50,15 +51,10 @@ export async function CategoryBreakdownCard() {
             {spent.map((category) => (
               <li key={category.name} className="min-w-0">
                 <Link
-                  href={{
-                    pathname: "/transactions",
-                    query: {
-                      category: category.name,
-                      period: "custom",
-                      from: startDate,
-                      to: endDate,
-                    },
-                  }}
+                  href={purchasesHref(category.name, {
+                    start: startDate,
+                    end: endDate,
+                  })}
                   className="flex min-h-11 items-start gap-2 rounded-lg py-2 text-[13px] hover:bg-muted focus-visible:bg-muted"
                 >
                   <CategoryDot color={category.color} className="mt-1" />
