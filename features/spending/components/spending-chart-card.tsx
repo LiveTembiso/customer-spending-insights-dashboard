@@ -3,7 +3,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { formatMonthLong, formatMonthShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-import { axisMax, STRIPES } from "../charts";
+import { axisMax } from "../charts";
 import { formatMetric, metricValue, monthStats } from "../insights";
 import { monthYear } from "../labels";
 import type { MonthlyTrend } from "../schemas";
@@ -14,6 +14,7 @@ import {
   MONTH_CHOICES,
   type MonthChoice,
 } from "../view";
+import { type MonthBar, MonthlyBarChart } from "./monthly-bar-chart";
 
 const TITLE_ID = "spending-chart-title";
 
@@ -22,12 +23,6 @@ const LABEL_EVERY: Record<MonthChoice, [phone: number, wide: number]> = {
   6: [1, 1],
   12: [2, 1],
   24: [4, 2],
-};
-
-const GAPS: Record<MonthChoice, string> = {
-  6: "gap-2 sm:gap-6",
-  12: "gap-1.5 sm:gap-3",
-  24: "gap-0.5 sm:gap-1.5",
 };
 
 const layoutFor = (count: number): MonthChoice =>
@@ -167,13 +162,21 @@ function Chart({
 }) {
   const { current, average, highest } = monthStats(trends, metric);
   const top = axisMax(Math.max(...trends.map((t) => metricValue(t, metric))));
-  const [phoneEvery, wideEvery] = LABEL_EVERY[months];
-  const columns = { gridTemplateColumns: `repeat(${months}, minmax(0, 1fr))` };
 
+  const name = (trend: MonthlyTrend) =>
+    `${formatMonthLong(trend.month)} ${trend.month.slice(0, 4)}${trend === current ? " to date" : ""}`;
+  const bars: MonthBar[] = trends.map((trend) => ({
+    month: trend.month,
+    label: formatMonthShort(trend.month),
+    title: name(trend),
+    value: metricValue(trend, metric),
+    look: trend === current ? "striped" : trend === highest ? "solid" : "muted",
+    strong: trend === highest,
+  }));
   const spoken = trends
     .map(
       (trend) =>
-        `${formatMonthLong(trend.month)} ${trend.month.slice(0, 4)}${trend === current ? " to date" : ""} ${formatMetric(metricValue(trend, metric), metric)}`,
+        `${name(trend)} ${formatMetric(metricValue(trend, metric), metric)}`,
     )
     .join(", ");
   const label = `${METRIC_LABELS[metric]} by month: ${spoken}.${
@@ -185,107 +188,20 @@ function Chart({
   return (
     <div
       aria-busy={stale || undefined}
-      className={cn(
-        "mt-4 grid grid-cols-[44px_minmax(0,1fr)] gap-x-2.5 gap-y-2.5 transition-opacity sm:grid-cols-[56px_minmax(0,1fr)]",
-        stale && "opacity-60",
-      )}
+      className={cn("mt-2 transition-opacity", stale && "opacity-60")}
     >
-      <div
-        aria-hidden
-        className="relative h-50 text-right text-xs text-muted-foreground tabular-nums sm:h-55"
-      >
-        {[1, 0.5, 0].map((share) => (
-          <span
-            key={share}
-            className="absolute right-0 -translate-y-1/2"
-            style={{ top: `${(1 - share) * 100}%` }}
-          >
-            {formatMetric(top * share, metric)}
-          </span>
-        ))}
-      </div>
-      <div className="relative h-50 border-b border-border bg-[linear-gradient(var(--background)_1px,transparent_1px)] bg-size-[100%_50%] sm:h-55">
-        <div
-          role="img"
-          aria-label={label}
-          className={cn(
-            "absolute inset-0 grid items-end px-1 forced-color-adjust-none sm:px-4",
-            GAPS[months],
-          )}
-          style={columns}
-        >
-          {trends.map((trend) => {
-            const value = metricValue(trend, metric);
-            const isCurrent = trend === current;
-            const isHighest = trend === highest;
-            return (
-              <div
-                key={trend.month}
-                className={cn(
-                  "relative rounded-t-[6px] sm:rounded-t-[8px]",
-                  isCurrent
-                    ? "border-2 border-b-0 border-primary"
-                    : isHighest
-                      ? "bg-primary"
-                      : "bg-bar-muted inset-ring inset-ring-bar-muted-edge",
-                )}
-                style={{
-                  height: `${(value / top) * 100}%`,
-                  background: isCurrent ? STRIPES : undefined,
-                }}
-              >
-                {months === 6 && (
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "absolute -inset-x-1 bottom-full z-10 pb-1.5 text-center text-[11px] tabular-nums sm:text-xs",
-                      isHighest
-                        ? "font-extrabold text-foreground"
-                        : "text-muted-foreground",
-                    )}
-                  >
-                    <span className="rounded-sm bg-card px-0.5">
-                      {formatMetric(value, metric)}
-                    </span>
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        {average !== null && (
-          <div
-            aria-hidden
-            className="absolute inset-x-0 border-t-2 border-dashed border-foreground"
-            style={{ bottom: `${(average / top) * 100}%` }}
-          />
-        )}
-      </div>
-      <span />
-      <div
-        aria-hidden
-        className={cn(
-          "grid px-1 text-center text-xs text-muted-foreground sm:px-4 sm:text-[13px]",
-          GAPS[months],
-        )}
-        style={columns}
-      >
-        {trends.map((trend, index) => {
-          const fromEnd = trends.length - 1 - index;
-          return (
-            <span
-              key={trend.month}
-              className={cn(
-                fromEnd % phoneEvery !== 0 && "invisible",
-                fromEnd % wideEvery === 0 ? "sm:visible" : "sm:invisible",
-                trend === highest && "font-bold text-foreground",
-              )}
-            >
-              {formatMonthShort(trend.month)}
-            </span>
-          );
-        })}
-      </div>
+      <MonthlyBarChart
+        bars={bars}
+        top={top}
+        metric={metric}
+        label={label}
+        average={average ?? undefined}
+        showValues={months === 6}
+        labelEvery={LABEL_EVERY[months]}
+        radius={8}
+        axisWidth={56}
+        className="h-60 sm:h-64"
+      />
     </div>
   );
 }
