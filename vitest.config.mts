@@ -13,7 +13,7 @@ export default defineConfig({
     env: { LOG_LEVEL: "silent" },
     coverage: {
       provider: "v8",
-      reporter: ["text", "html", "lcov"],
+      reporter: ["text", "html", "lcov", "json-summary"],
       include: ["**/*.{ts,tsx}"],
       exclude: [
         ...(configDefaults.coverage.exclude ?? []),

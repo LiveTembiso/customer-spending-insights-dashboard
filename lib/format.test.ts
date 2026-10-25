@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  formatCompactRands,
   formatDateRange,
   formatDay,
   formatDayHeading,
@@ -11,6 +12,43 @@ import {
   formatPercent,
   formatRands,
 } from "./format";
+
+describe("formatCompactRands", () => {
+  it("shortens thousands, millions and billions to 3 significant digits", () => {
+    expect(formatCompactRands(10000)).toBe("R10K");
+    expect(formatCompactRands(100000)).toBe("R100K");
+    expect(formatCompactRands(2500)).toBe("R2.5K");
+    expect(formatCompactRands(22456)).toBe("R22.5K");
+    expect(formatCompactRands(1000000)).toBe("R1M");
+    expect(formatCompactRands(1250000)).toBe("R1.25M");
+    expect(formatCompactRands(3_000_000_000)).toBe("R3B");
+  });
+
+  it("carries into the next unit when rounding reaches 1 000", () => {
+    expect(formatCompactRands(999_950)).toBe("R1M");
+    expect(formatCompactRands(999_400)).toBe("R999K");
+  });
+
+  it("leaves amounts under 1 000 as they are", () => {
+    expect(formatCompactRands(0)).toBe("R0");
+    expect(formatCompactRands(750)).toBe("R750");
+    expect(formatCompactRands(999.4)).toBe("R999");
+  });
+
+  it("carries amounts that round to 1 000 into thousands", () => {
+    expect(formatCompactRands(999.6)).toBe("R1K");
+  });
+
+  it("keeps the sign of negative amounts", () => {
+    expect(formatCompactRands(-2500)).toBe("-R2.5K");
+    expect(formatCompactRands(-750)).toBe("-R750");
+  });
+
+  it("shows a dash for values that aren't numbers", () => {
+    expect(formatCompactRands(Number.NaN)).toBe("—");
+    expect(formatCompactRands(Number.POSITIVE_INFINITY)).toBe("—");
+  });
+});
 
 describe("formatRands", () => {
   it("groups thousands with a space and keeps a decimal point", () => {

@@ -5,9 +5,9 @@ import { formatRands } from "@/lib/format";
 import { roundTo } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
-import { donutGradient } from "../charts";
 import { purchases } from "../labels";
 import type { CategoriesResponse } from "../schemas";
+import { CategoryDonut, DonutTotal } from "./category-donut";
 
 const averageOf = (amount: number, count: number) =>
   count === 0 ? 0 : roundTo(amount / count, 2);
@@ -51,21 +51,17 @@ export function CategorySpendCard({
           )}
         >
           <div className="flex items-center gap-4.5">
-            {/* The table carries every figure, so the ring is decorative. */}
-            <div
-              aria-hidden
-              className="flex size-32 shrink-0 items-center justify-center rounded-full shadow-[inset_0_0_0_1px_rgba(14,27,44,0.18)] forced-color-adjust-none sm:size-44"
-              style={{ background: donutGradient(spent) }}
+            <CategoryDonut
+              slices={spent}
+              size={176}
+              className="size-32 sm:size-44"
             >
-              <div className="flex size-[84px] flex-col items-center justify-center gap-0.5 rounded-full bg-card shadow-[0_0_0_1px_rgba(14,27,44,0.18)] sm:size-29">
-                <span className="hidden text-[17px] font-extrabold tabular-nums sm:inline">
-                  {formatRands(breakdown.totalAmount)}
-                </span>
-                <span className="hidden text-xs text-muted-foreground sm:inline">
-                  {categoriesLabel}
-                </span>
-              </div>
-            </div>
+              <DonutTotal
+                amount={breakdown.totalAmount}
+                caption={categoriesLabel}
+                className="hidden sm:flex"
+              />
+            </CategoryDonut>
             <p className="flex flex-col gap-0.5 sm:hidden">
               <span className="text-xs text-muted-foreground">
                 Spent across {categoriesLabel}
