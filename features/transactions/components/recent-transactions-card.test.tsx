@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { makeTransaction } from "@/test-utils/fixtures";
+
 import type { Transaction } from "../schemas";
 import { getCurrentRecentTransactions } from "../server/current";
 import { RecentTransactionsCard } from "./recent-transactions-card";
@@ -9,17 +11,9 @@ vi.mock("../server/current", () => ({
   getCurrentRecentTransactions: vi.fn(),
 }));
 
-const transaction: Transaction = {
-  id: "txn_001",
+const transaction: Transaction = makeTransaction({
   date: "2026-10-16T22:30:00Z",
-  merchant: "Pick n Pay",
-  category: "Groceries",
-  amount: 245.8,
-  description: "Weekly groceries",
-  paymentMethod: "Credit Card",
-  icon: "shopping-cart",
-  categoryColor: "#FF6B6B",
-};
+});
 
 async function renderCard(transactions: Transaction[]) {
   vi.mocked(getCurrentRecentTransactions).mockResolvedValue({

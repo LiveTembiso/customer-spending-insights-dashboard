@@ -1,8 +1,6 @@
-import { daysInMonth, startOfDay, toMonthKey } from "@/lib/dates";
+import { DAY_MS, daysInMonth, startOfDay, toMonthKey } from "@/lib/dates";
 
 import type { Goal, GoalStatus } from "./schemas";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** How much of this SAST month has gone, 0–100, counting today in part. */
 export function monthElapsedPercent(now: Date): number {

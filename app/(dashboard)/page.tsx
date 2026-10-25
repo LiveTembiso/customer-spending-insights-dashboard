@@ -18,9 +18,6 @@ export default function OverviewPage() {
         className="grid gap-6 py-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:items-center lg:gap-10"
       >
         <div className="flex flex-col gap-3">
-          <p className="text-xs font-bold tracking-[0.14em] text-muted-foreground uppercase">
-            Spending insights
-          </p>
           <h1
             id="overview-title"
             className="text-[32px] leading-[1.1] font-extrabold tracking-tight text-heading md:text-[40px]"

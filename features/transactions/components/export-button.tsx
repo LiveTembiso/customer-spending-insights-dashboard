@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import { Download, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -50,7 +52,8 @@ export function ExportButton({
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={exportCsv}
         disabled={disabled}
@@ -70,7 +73,7 @@ export function ExportButton({
         <span aria-hidden className="hidden sm:inline">
           {busy ? "Exporting…" : "Export CSV"}
         </span>
-      </button>
+      </Button>
       <p
         role="status"
         className="text-right text-[13px] font-semibold text-destructive"

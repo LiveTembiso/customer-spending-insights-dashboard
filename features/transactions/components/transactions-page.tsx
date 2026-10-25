@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 
@@ -54,19 +55,19 @@ export function TransactionsPageSkeleton() {
     <>
       <PageHeader eyebrow="Search, filter and sort" title="Transactions" />
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-4 rounded-[22px] bg-card p-5">
+        <Card className="flex flex-col gap-4 rounded-[22px] bg-card p-5">
           <Skeleton className="h-11 w-full" />
           <Skeleton className="h-11 w-2/3" />
-        </div>
+        </Card>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] gap-3">
           <Skeleton className="h-[86px] rounded-[18px] bg-card" />
           <Skeleton className="h-[86px] rounded-[18px] bg-card" />
           <Skeleton className="h-[86px] rounded-[18px] bg-card" />
         </div>
-        <div className="flex flex-col gap-4 rounded-[22px] bg-card p-5">
+        <Card className="flex flex-col gap-4 rounded-[22px] bg-card p-5">
           <Skeleton className="h-6 w-40" />
           <ListSkeleton />
-        </div>
+        </Card>
       </div>
     </>
   );

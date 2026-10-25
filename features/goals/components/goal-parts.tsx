@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { getCategory } from "@/features/categories/catalogue";
 import { CategoryIcon } from "@/features/categories/components/category-icon";
 import { formatRands } from "@/lib/format";
@@ -55,16 +57,16 @@ export function StatusPill({ goal, id }: { goal: Goal; id?: string }) {
   const status = GOAL_STATUS[goal.status];
   const Icon = status.icon;
   return (
-    <span
+    <Badge
       id={id}
       className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap",
+        "inline-flex h-auto shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap",
         status.pill,
       )}
     >
       <Icon aria-hidden className="size-3.5" strokeWidth={2.5} />
       {status.label}
-    </span>
+    </Badge>
   );
 }
 
@@ -88,27 +90,20 @@ export function PaceBar({
   const pace = Math.min(Math.round(monthElapsed), 100);
 
   return (
-    <div
-      role={decorative ? undefined : "img"}
-      aria-hidden={decorative || undefined}
-      aria-label={
-        decorative
-          ? undefined
-          : `${used} percent of the ${goal.category.toLowerCase()} budget used. Spending evenly, you'd be at ${pace} percent by today.`
-      }
-      className={cn(
-        "relative h-3 rounded-full forced-color-adjust-none",
-        status.track,
-        className,
-      )}
-    >
-      <div
-        className={cn("h-full rounded-full", status.bar)}
-        style={{ width: `${Math.min(goal.percentageUsed, 100)}%` }}
+    <div className={cn("relative h-3", className)}>
+      <Progress
+        value={Math.min(goal.percentageUsed, 100)}
+        aria-hidden={decorative || undefined}
+        aria-label={`${goal.category} budget used`}
+        aria-valuetext={`${used} percent used. Spending evenly, you'd be at ${pace} percent by today.`}
+        className="block h-full forced-color-adjust-none"
+        trackClassName={cn("h-full", status.track)}
+        indicatorClassName={cn("rounded-full", status.bar)}
       />
-      <div
+      <span
+        aria-hidden
         className={cn(
-          "absolute -inset-y-[5px] -ml-[1.5px] w-[3px] rounded-[2px] bg-navy",
+          "pointer-events-none absolute -inset-y-[5px] -ml-[1.5px] w-[3px] rounded-[2px] bg-navy",
           onWarning
             ? "shadow-[0_0_0_1.5px_var(--warning-surface)]"
             : "shadow-[0_0_0_1.5px_var(--card)]",

@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { expectCategorySelected } from "./helpers/transactions";
+
 test.describe("goals", () => {
   test("shows each goal with its progress", async ({ page }) => {
     await page.goto("/goals");
@@ -16,10 +18,7 @@ test.describe("goals", () => {
     }
   });
 
-  test("opens this month's purchases for a goal", async ({
-    page,
-    isMobile,
-  }) => {
+  test("opens this month's purchases for a goal", async ({ page }) => {
     await page.goto("/goals");
     // Groceries is a card when it needs attention and a list row otherwise.
     await page
@@ -29,18 +28,6 @@ test.describe("goals", () => {
     await expect(page).toHaveURL(
       /\/transactions\?category=Groceries&period=custom&from=\d{4}-\d{2}-01&to=/,
     );
-    if (isMobile) {
-      await expect(
-        page.getByRole("combobox", { name: "Category" }),
-      ).toHaveValue("Groceries");
-    } else {
-      await expect(
-        page.getByRole("button", {
-          name: "Groceries",
-          exact: true,
-          pressed: true,
-        }),
-      ).toBeVisible();
-    }
+    await expectCategorySelected(page, "Groceries");
   });
 });

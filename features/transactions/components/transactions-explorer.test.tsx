@@ -1,11 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type ReadonlyURLSearchParams, useSearchParams } from "next/navigation";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -15,6 +8,12 @@ import { CATEGORIES } from "@/features/categories/catalogue";
 import { goalsQuery } from "@/features/goals/api";
 import type { Goal } from "@/features/goals/schemas";
 import { categoriesQuery } from "@/features/spending/api";
+import { selectOption } from "@/test-utils/select";
+import { makeGoal, makeTransaction } from "@/test-utils/fixtures";
+import {
+  createQueryWrapper,
+  createTestQueryClient,
+} from "@/test-utils/query-client";
 
 import { transactionsQuery } from "../api";
 import { parseFilters, toTotalsQuery, toTransactionsQuery } from "../filters";
@@ -26,27 +25,15 @@ vi.mock("next/navigation", () => ({ useSearchParams: vi.fn() }));
 const CUSTOMER = "12345";
 const TODAY = "2026-10-20";
 
-const transaction: Transaction = {
-  id: "txn_001",
-  date: "2026-10-20T06:14:00Z",
-  merchant: "Pick n Pay",
-  category: "Groceries",
-  amount: 245.8,
-  description: "Weekly groceries",
-  paymentMethod: "Credit Card",
-  icon: "shopping-cart",
-  categoryColor: "#FF6B6B",
-};
+const transaction: Transaction = makeTransaction();
 
-const goal: Goal = {
-  id: "goal_001",
-  category: "Groceries",
+const goal: Goal = makeGoal({
   monthlyBudget: 5500,
   currentSpent: 5318,
   percentageUsed: 96.7,
   daysRemaining: 12,
   status: "warning",
-};
+});
 
 let wideScreen = false;
 
@@ -64,9 +51,7 @@ function renderExplorer(
   { total = transactions?.length ?? 0, totals = true } = {},
 ) {
   const filters = setUrl(search);
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-  });
+  const client = createTestQueryClient();
 
   if (transactions) {
     const query = toTransactionsQuery(filters, TODAY);
@@ -108,11 +93,9 @@ function renderExplorer(
   client.setQueryData(goalsQuery(CUSTOMER).queryKey, { goals: [goal] });
 
   const tree = () => (
-    <QueryClientProvider client={client}>
-      <TransactionsExplorer customerId={CUSTOMER} today={TODAY} />
-    </QueryClientProvider>
+    <TransactionsExplorer customerId={CUSTOMER} today={TODAY} />
   );
-  const { rerender } = render(tree());
+  const { rerender } = render(tree(), { wrapper: createQueryWrapper(client) });
   return {
     /** Follows a URL change the way Next does after pushState. */
     navigateTo(next: string) {
@@ -133,14 +116,6 @@ beforeEach(() => {
       removeEventListener: vi.fn(),
     })),
   );
-  // jsdom has no modal dialogs.
-  HTMLDialogElement.prototype.showModal = function () {
-    this.open = true;
-  };
-  HTMLDialogElement.prototype.close = function () {
-    this.open = false;
-    this.dispatchEvent(new Event("close"));
-  };
 });
 
 afterEach(() => {
@@ -173,36 +148,30 @@ describe("TransactionsExplorer", () => {
   it("puts a chosen category in the URL", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("");
-    await userEvent.click(screen.getByRole("button", { name: "Groceries" }));
+    await selectOption("Category", "Groceries");
     expect(pushState).toHaveBeenCalledWith(null, "", "?category=Groceries");
   });
 
-  it("selects any category from the mobile control and returns to page one", async () => {
+  it("selects any category and returns to page one", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("page=3");
-    await userEvent.selectOptions(
-      screen.getByRole("combobox", { name: "Category" }),
-      "Utilities",
-    );
+    await selectOption("Category", "Utilities");
     expect(pushState).toHaveBeenCalledWith(null, "", "?category=Utilities");
   });
 
-  it("clears the mobile category selection while keeping other filters", async () => {
+  it("clears the category selection while keeping other filters", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("category=Groceries&q=pick");
     const category = screen.getByRole("combobox", { name: "Category" });
-    expect(category).toHaveValue("Groceries");
-    await userEvent.selectOptions(category, "");
+    expect(category).toHaveTextContent("Groceries");
+    await selectOption("Category", "All categories");
     expect(pushState).toHaveBeenCalledWith(null, "", "?q=pick");
   });
 
   it("goes back to the first page when a filter changes", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("page=3");
-    await userEvent.selectOptions(
-      screen.getByLabelText("Sort by"),
-      "Highest amount",
-    );
+    await selectOption("Sort by", "Highest amount");
     expect(pushState).toHaveBeenCalledWith(null, "", "?sort=amount_desc");
   });
 
@@ -289,38 +258,28 @@ describe("TransactionsExplorer search", () => {
 describe("TransactionsExplorer custom range", () => {
   const search = "period=custom&from=2026-09-01&to=2026-09-30";
 
-  it("applies a valid range", () => {
-    const replaceState = vi.spyOn(window.history, "replaceState");
+  it("applies a valid range after confirmation", async () => {
+    const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer(search);
-    fireEvent.change(screen.getByLabelText("From"), {
-      target: { value: "2026-09-10" },
-    });
-    expect(replaceState).toHaveBeenCalledWith(
+    await userEvent.click(screen.getByRole("button", { name: "Custom range" }));
+    await userEvent.click(screen.getByRole("button", { name: /September 10/ }));
+    await userEvent.click(screen.getByRole("button", { name: /September 30/ }));
+    expect(pushState).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Apply range" }));
+    expect(pushState).toHaveBeenCalledWith(
       null,
       "",
       "?period=custom&from=2026-09-10&to=2026-09-30",
     );
   });
 
-  it("explains a backwards range and leaves the URL alone", () => {
-    const replaceState = vi.spyOn(window.history, "replaceState");
+  it("keeps an incomplete range out of the URL", async () => {
+    const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer(search);
-    fireEvent.change(screen.getByLabelText("From"), {
-      target: { value: "2026-10-05" },
-    });
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Choose a start date on or before the end date.",
-    );
-    expect(replaceState).not.toHaveBeenCalled();
-  });
-
-  it("ignores the partial years a typed date passes through", () => {
-    const replaceState = vi.spyOn(window.history, "replaceState");
-    renderExplorer(search);
-    fireEvent.change(screen.getByLabelText("From"), {
-      target: { value: "0002-09-01" },
-    });
-    expect(replaceState).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Custom range" }));
+    await userEvent.click(screen.getByRole("button", { name: /September 10/ }));
+    expect(screen.getByRole("button", { name: "Apply range" })).toBeDisabled();
+    expect(pushState).not.toHaveBeenCalled();
   });
 });
 

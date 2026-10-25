@@ -4,8 +4,10 @@ import {
   categoryIconSchema,
   categoryNameSchema,
 } from "@/features/categories/schemas";
+import { DEFAULT_PERIOD } from "@/lib/periods";
 import {
   amountSchema,
+  dateRangeQuerySchema,
   hexColorSchema,
   isoDateSchema,
   monthSchema,
@@ -16,7 +18,7 @@ import {
 
 // GET /api/customers/{customerId}/spending/summary
 export const summaryQuerySchema = z.object({
-  period: periodSchema.default("30d"),
+  period: periodSchema.default(DEFAULT_PERIOD),
 });
 
 export type SummaryQuery = z.infer<typeof summaryQuerySchema>;
@@ -37,11 +39,9 @@ export const summaryResponseSchema = z.object({
 export type SummaryResponse = z.infer<typeof summaryResponseSchema>;
 
 // GET /api/customers/{customerId}/spending/categories
-export const categoriesQuerySchema = z
-  .object({
-    period: periodSchema.default("30d"),
-    startDate: isoDateSchema.optional(),
-    endDate: isoDateSchema.optional(),
+export const categoriesQuerySchema = dateRangeQuerySchema
+  .safeExtend({
+    period: periodSchema.default(DEFAULT_PERIOD),
   })
   .refine(
     (query) =>
@@ -50,13 +50,6 @@ export const categoriesQuerySchema = z
       message: "startDate and endDate must be provided together",
       path: ["endDate"],
     },
-  )
-  .refine(
-    (query) =>
-      query.startDate === undefined ||
-      query.endDate === undefined ||
-      query.startDate <= query.endDate,
-    { message: "startDate must not be after endDate", path: ["endDate"] },
   );
 
 export type CategoriesQuery = z.infer<typeof categoriesQuerySchema>;

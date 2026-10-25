@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Goal } from "@/features/goals/schemas";
+import { makeCategorySpend, makeGoal } from "@/test-utils/fixtures";
 
 import { formatMetric, monthStats, standOut, vsAverage } from "./insights";
 import type { CategorySpend, MonthlyTrend } from "./schemas";
@@ -32,24 +33,16 @@ const category = (
   name: CategorySpend["name"],
   amount: number,
   transactionCount: number,
-): CategorySpend => ({
-  name,
-  amount,
-  transactionCount,
-  percentage: 0,
-  color: "#FF6B6B",
-  icon: "shopping-cart",
-});
+): CategorySpend =>
+  makeCategorySpend({ name, amount, transactionCount, percentage: 0 });
 
-const goal: Goal = {
-  id: "goal_001",
-  category: "Groceries",
+const goal: Goal = makeGoal({
   monthlyBudget: 5500,
   currentSpent: 5318,
   percentageUsed: 96.7,
   daysRemaining: 12,
   status: "warning",
-};
+});
 
 describe("monthStats", () => {
   it("leaves the current month out of the average and the highest", () => {

@@ -1,9 +1,12 @@
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import Link from "next/link";
 
+import { purchasesHref } from "@/features/transactions/links";
 import type { DayKey } from "@/lib/dates";
 import { formatRands } from "@/lib/format";
 
-import { purchasesHref } from "../links";
 import { goalPace } from "../pace";
 import type { Goal } from "../schemas";
 import {
@@ -47,7 +50,8 @@ export function GoalCard({ goal, monthElapsed, today }: GoalCardProps) {
   const titleId = `goal-${goal.id}`;
 
   return (
-    <section
+    <Card
+      role="region"
       aria-labelledby={titleId}
       className="flex min-w-0 flex-col gap-4 rounded-[18px] border border-warning-border bg-warning-surface p-[18px] md:rounded-[22px] md:p-6"
     >
@@ -94,12 +98,15 @@ export function GoalCard({ goal, monthElapsed, today }: GoalCardProps) {
         </p>
         <Link
           href={purchasesHref(goal.category, today)}
-          className="flex min-h-11 shrink-0 items-center self-start rounded-[12px] border-[1.5px] border-navy px-4 text-sm font-bold text-foreground hover:bg-navy/5 sm:self-auto"
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "flex min-h-11 shrink-0 items-center self-start rounded-[12px] border-[1.5px] border-navy bg-transparent px-4 text-sm font-bold text-foreground hover:bg-navy/5 sm:self-auto",
+          )}
         >
           See purchases{" "}
           <span className="sr-only">in {goal.category.toLowerCase()}</span>
         </Link>
       </div>
-    </section>
+    </Card>
   );
 }

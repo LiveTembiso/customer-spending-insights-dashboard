@@ -1,5 +1,10 @@
 "use client";
 
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+import { Button } from "@/components/ui/button";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
@@ -8,29 +13,18 @@ import { PageHeader } from "@/components/layout/page-header";
 import { goalsQuery } from "@/features/goals/api";
 import { formatDateRange } from "@/lib/format";
 import { navigate } from "@/lib/history";
+import { PERIOD_LABELS } from "@/lib/periods";
 import { type Period, PERIODS } from "@/lib/schemas";
 import { cn, pressedInForcedColors } from "@/lib/utils";
 
 import { categoriesQuery, summaryQuery, trendsQuery } from "../api";
 import { standOut } from "../insights";
-import {
-  type InsightsView,
-  parseView,
-  PERIOD_LABELS,
-  toSearchParams,
-} from "../view";
+import { type InsightsView, parseView, toSearchParams } from "../view";
 import { CategorySpendCard } from "./category-spend-card";
 import { InsightsSummary } from "./insights-summary";
 import { MonthTableCard } from "./month-table-card";
 import { SpendingChartCard } from "./spending-chart-card";
 import { StandOutCard } from "./stand-out-card";
-
-const LAST: Record<Period, string> = {
-  "7d": "Last 7 days",
-  "30d": "Last 30 days",
-  "90d": "Last 90 days",
-  "1y": "Last year",
-};
 
 function PeriodControl({
   period,
@@ -40,52 +34,58 @@ function PeriodControl({
   onChange: (period: Period) => void;
 }) {
   return (
-    <div
-      role="group"
+    <ToggleGroup
+      value={[period]}
+      onValueChange={(values) => {
+        const next = PERIODS.find((value) => value === values[0]);
+        if (next) onChange(next);
+      }}
       aria-label="Period"
       className="grid w-full grid-cols-4 gap-1 rounded-[12px] bg-card p-1 sm:flex sm:w-auto"
     >
       {PERIODS.map((value) => {
         const pressed = value === period;
         return (
-          <button
+          <ToggleGroupItem
             key={value}
             type="button"
-            aria-pressed={pressed}
-            onClick={() => onChange(value)}
+            value={value}
             className={cn(
               "min-h-11 rounded-[9px] border border-transparent px-3.5 text-[13px] whitespace-nowrap sm:text-sm",
               pressed
                 ? cn(
-                    "bg-navy font-bold text-navy-foreground",
+                    "bg-navy font-bold text-navy-foreground data-pressed:bg-navy data-pressed:text-navy-foreground data-pressed:hover:bg-navy",
                     pressedInForcedColors,
                   )
                 : "font-semibold text-muted-strong hover:bg-background",
             )}
           >
-            {PERIOD_LABELS[value]}
-          </button>
+            {PERIOD_LABELS[value].short}
+          </ToggleGroupItem>
         );
       })}
-    </div>
+    </ToggleGroup>
   );
 }
 
 function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
   return (
-    <div
+    <Alert
       role="alert"
       className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] bg-card p-5"
     >
-      <p className="text-sm text-muted-strong">We couldn&apos;t load {what}.</p>
-      <button
+      <AlertDescription className="text-sm text-muted-strong">
+        We couldn&apos;t load {what}.
+      </AlertDescription>
+      <Button
+        variant="ghost"
         type="button"
         onClick={onRetry}
         className="min-h-11 rounded-[12px] border-[1.5px] border-navy px-4 text-sm font-bold text-navy hover:bg-background"
       >
         Try again
-      </button>
-    </div>
+      </Button>
+    </Alert>
   );
 }
 
@@ -131,8 +131,8 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
     ? undefined
     : categories.data?.dateRange;
   const periodDescription = range
-    ? `${LAST[period]} · ${formatDateRange(range.startDate, range.endDate)}`
-    : LAST[period];
+    ? `${PERIOD_LABELS[period].current} · ${formatDateRange(range.startDate, range.endDate)}`
+    : PERIOD_LABELS[period].current;
 
   return (
     <>
@@ -195,7 +195,7 @@ export function InsightsExplorer({ customerId }: { customerId: string }) {
             <StandOutCard
               notes={notes}
               stale={categories.isPlaceholderData || trends.isPlaceholderData}
-              description={`Based on the ${LAST[period].toLowerCase()} and your recent months`}
+              description={`Based on the ${PERIOD_LABELS[period].current.toLowerCase()} and your recent months`}
             />
           </div>
         )}

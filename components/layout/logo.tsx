@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+import { APP_NAME } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 /** The full Capitec wordmark on its own white panel, with the product name. */
@@ -16,7 +17,7 @@ export function Logo({ className }: { className?: string }) {
         />
       </span>
       <span className="px-1 text-[15px] leading-tight font-extrabold tracking-tight">
-        Spending Insights
+        {APP_NAME}
       </span>
     </span>
   );
@@ -34,7 +35,7 @@ export function LogoCompact({ className }: { className?: string }) {
         className="h-6 w-auto"
       />
       <span className="text-[17px] leading-tight tracking-tight">
-        Spending Insights
+        {APP_NAME}
       </span>
     </span>
   );

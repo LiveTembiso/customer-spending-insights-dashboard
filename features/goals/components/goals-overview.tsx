@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import { SectionCardSkeleton } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMonthLong } from "@/lib/format";
@@ -25,12 +26,15 @@ export async function GoalsOverview() {
 
   if (goals.length === 0) {
     return (
-      <section className="flex flex-col gap-1 rounded-[22px] bg-card p-6">
+      <Card
+        role="region"
+        className="flex flex-col gap-1 rounded-[22px] bg-card p-6"
+      >
         <h2 className="text-lg font-bold">No goals set yet</h2>
         <p className="text-sm text-muted-foreground">
           Your spending this month is below, by category.
         </p>
-      </section>
+      </Card>
     );
   }
 

@@ -1,20 +1,15 @@
+import { Card } from "@/components/ui/card";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryDot } from "@/features/categories/components/category-dot";
 import { CategoryIcon } from "@/features/categories/components/category-icon";
 import { formatPercent, formatRands } from "@/lib/format";
+import { PERIOD_LABELS } from "@/lib/periods";
 import type { Period } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
 import type { CategoriesResponse, SummaryResponse } from "../schemas";
-
-const PREVIOUS: Record<Period, string> = {
-  "7d": "previous 7 days",
-  "30d": "previous 30 days",
-  "90d": "previous 90 days",
-  "1y": "previous year",
-};
 
 const tile =
   "flex min-w-0 flex-col gap-1 rounded-[18px] bg-card px-4 py-3.5 sm:gap-1.5 sm:px-5 sm:py-4.5";
@@ -86,34 +81,34 @@ export function InsightsSummary({
 
   return (
     <section
-      aria-label={`Compared with the ${PREVIOUS[period]}`}
+      aria-label={`Compared with the ${PERIOD_LABELS[period].previous}`}
       aria-busy={stale || undefined}
       className={cn(
         "grid grid-cols-2 gap-3 transition-opacity lg:grid-cols-3",
         stale && "opacity-60",
       )}
     >
-      <div className={tile}>
+      <Card className={tile}>
         <span className={label}>Total spent</span>
         <span className={figure}>{formatRands(summary.totalSpent)}</span>
         <Change
           change={spentChange}
           words={["more", "less"]}
-          previous={PREVIOUS[period]}
+          previous={PERIOD_LABELS[period].previous}
           colors={["text-warning-foreground", "text-primary"]}
         />
-      </div>
-      <div className={tile}>
+      </Card>
+      <Card className={tile}>
         <span className={label}>Transactions</span>
         <span className={figure}>{summary.transactionCount}</span>
         <Change
           change={transactionChange}
           words={["more", "fewer"]}
-          previous={PREVIOUS[period]}
+          previous={PERIOD_LABELS[period].previous}
           colors={["text-muted-strong", "text-muted-strong"]}
         />
-      </div>
-      <div
+      </Card>
+      <Card
         className={cn(
           tile,
           "col-span-2 flex-row items-center gap-3 sm:gap-3 lg:col-span-1 lg:flex-col lg:items-start lg:gap-1.5",
@@ -148,7 +143,7 @@ export function InsightsSummary({
             of spend
           </span>
         )}
-      </div>
+      </Card>
     </section>
   );
 }
@@ -157,14 +152,14 @@ export function InsightsSummarySkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
       {[0, 1, 2].map((index) => (
-        <div
+        <Card
           key={index}
           className={cn(tile, index === 2 && "col-span-2 lg:col-span-1")}
         >
           <Skeleton className="h-4 w-20" />
           <Skeleton className="h-7 w-28" />
           <Skeleton className="h-4 w-24" />
-        </div>
+        </Card>
       ))}
     </div>
   );

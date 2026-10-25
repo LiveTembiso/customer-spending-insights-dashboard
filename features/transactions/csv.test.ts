@@ -1,19 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import { makeTransaction } from "@/test-utils/fixtures";
+
 import { toCsv } from "./csv";
 import type { Transaction } from "./schemas";
 
-const transaction: Transaction = {
-  id: "txn_001",
+const transaction: Transaction = makeTransaction({
   date: "2026-10-16T22:30:00Z",
-  merchant: "Pick n Pay",
-  category: "Groceries",
-  amount: 245.8,
-  description: "Weekly groceries",
-  paymentMethod: "Credit Card",
-  icon: "shopping-cart",
-  categoryColor: "#FF6B6B",
-};
+});
 
 const lines = (csv: string) => csv.trimEnd().split("\r\n");
 

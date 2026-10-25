@@ -1,29 +1,25 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { makeWarningGoal as goal } from "@/test-utils/fixtures";
+import { normalizedText as text } from "@/test-utils/text";
+
 import type { Goal } from "../schemas";
 import {
   getCurrentGoalsProgress,
   getCurrentUntrackedSpending,
 } from "../server/current";
-import { GoalsMonth, GoalsOverview } from "./goals-overview";
+import {
+  GoalsMonth,
+  GoalsOverview,
+  GoalsOverviewSkeleton,
+} from "./goals-overview";
 import { UntrackedSpending } from "./untracked-spending";
 
 vi.mock("../server/current", () => ({
   getCurrentGoalsProgress: vi.fn(),
   getCurrentUntrackedSpending: vi.fn(),
 }));
-
-const goal = (overrides: Partial<Goal>): Goal => ({
-  id: "goal_001",
-  category: "Groceries",
-  monthlyBudget: 5500,
-  currentSpent: 4473.12,
-  percentageUsed: 81.3,
-  daysRemaining: 11,
-  status: "warning",
-  ...overrides,
-});
 
 const goals = [
   goal({}),
@@ -54,9 +50,15 @@ async function renderOverview(list: Goal[]) {
   render(await GoalsOverview());
 }
 
-const text = (element: HTMLElement) => element.textContent?.replace(/\s/g, " ");
-
 describe("GoalsOverview", () => {
+  it("omits unavailable data and offers placeholders while loading", async () => {
+    vi.mocked(getCurrentGoalsProgress).mockResolvedValue(undefined);
+    const { container, rerender } = render(await GoalsOverview());
+    expect(container).toBeEmptyDOMElement();
+    rerender(<GoalsOverviewSkeleton />);
+    expect(container).not.toBeEmptyDOMElement();
+    expect(screen.queryByText(/R[0-9]/)).not.toBeInTheDocument();
+  });
   it("adds up the budgets and what's been spent against them", async () => {
     await renderOverview(goals);
     const summary = screen.getByRole("region", { name: /at a glance/ });
@@ -154,6 +156,16 @@ describe("GoalsOverview", () => {
 });
 
 describe("GoalsMonth", () => {
+  it("omits an unavailable month and shows only the month when there are no goals", async () => {
+    vi.mocked(getCurrentGoalsProgress).mockResolvedValue(undefined);
+    expect(await GoalsMonth()).toBeNull();
+    vi.mocked(getCurrentGoalsProgress).mockResolvedValue({
+      goals: [],
+      monthElapsed: 64.5,
+      today: "2026-10-21",
+    });
+    expect(await GoalsMonth()).toBe("October");
+  });
   it("names the month and the days left", async () => {
     vi.mocked(getCurrentGoalsProgress).mockResolvedValue({
       goals,
@@ -202,5 +214,22 @@ describe("UntrackedSpending", () => {
     expect(
       screen.getByText("Nothing yet this month outside your goals."),
     ).toBeInTheDocument();
+  });
+
+  it("leaves the section out when spending is unavailable", async () => {
+    vi.mocked(getCurrentUntrackedSpending).mockResolvedValue(undefined);
+    const { container } = render(await UntrackedSpending());
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("describes a single purchase with its amount", async () => {
+    vi.mocked(getCurrentUntrackedSpending).mockResolvedValue({
+      ...spending,
+      categories: [{ ...spending.categories[0], transactionCount: 1 }],
+    });
+    render(await UntrackedSpending());
+    expect(screen.getByRole("link")).toHaveAccessibleDescription(
+      /^1 transaction R4\s012\.14$/,
+    );
   });
 });

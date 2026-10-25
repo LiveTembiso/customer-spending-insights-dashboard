@@ -14,4 +14,12 @@ describe("purchasesHref", () => {
       "/transactions?category=Dining&period=custom&from=2026-10-01&to=2026-10-01",
     );
   });
+
+  it("preserves an explicit range across month boundaries", () => {
+    expect(
+      purchasesHref("Groceries", { start: "2026-09-25", end: "2026-10-24" }),
+    ).toBe(
+      "/transactions?category=Groceries&period=custom&from=2026-09-25&to=2026-10-24",
+    );
+  });
 });

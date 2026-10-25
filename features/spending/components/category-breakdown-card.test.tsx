@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { makeCategorySpend } from "@/test-utils/fixtures";
+
 import type { CategoriesResponse, CategorySpend } from "../schemas";
 import { getCurrentMonthCategories } from "../server/current";
 import { CategoryBreakdownCard } from "./category-breakdown-card";
@@ -11,14 +13,13 @@ const category = (
   name: CategorySpend["name"],
   amount: number,
   percentage: number,
-): CategorySpend => ({
-  name,
-  amount,
-  percentage,
-  transactionCount: amount > 0 ? 3 : 0,
-  color: "#FF6B6B",
-  icon: "shopping-cart",
-});
+): CategorySpend =>
+  makeCategorySpend({
+    name,
+    amount,
+    percentage,
+    transactionCount: amount > 0 ? 3 : 0,
+  });
 
 async function renderCard(categories: CategorySpend[]) {
   const response: CategoriesResponse = {
@@ -46,24 +47,18 @@ describe("CategoryBreakdownCard", () => {
     expect(chart.getAttribute("aria-label")?.replace(/\s/g, " ")).toBe(
       "Spending by category this month: Groceries R100.00 (100.0%). Total R100.00.",
     );
-    expect(screen.getByRole("list")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("link", { name: /^Dining/ }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
     expect(screen.getByText("1 category")).toBeInTheDocument();
   });
 
-  it("links each visible category to its purchases for the same dates", async () => {
+  it("links to the spending details in Insights", async () => {
     await renderCard([category("Groceries", 100, 100)]);
 
     expect(
       screen.getByRole("link", {
-        name: /Groceries R100.00.*View transactions/,
+        name: "View details of spending by category",
       }),
-    ).toHaveAttribute(
-      "href",
-      "/transactions?category=Groceries&period=custom&from=2026-10-01&to=2026-10-18",
-    );
+    ).toHaveAttribute("href", "/insights");
   });
 
   it("counts the categories in the middle of the donut", async () => {

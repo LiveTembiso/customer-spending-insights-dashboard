@@ -1,15 +1,16 @@
 import type { MetadataRoute } from "next";
 
+import { APP_DESCRIPTION, APP_NAME, THEME_COLOR } from "@/lib/brand";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Spending Insights",
+    name: APP_NAME,
     short_name: "Spending",
-    description:
-      "See where your money goes, spot trends and keep your budgets on track.",
+    description: APP_DESCRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#eef1f5",
-    theme_color: "#0e1b2c",
+    theme_color: THEME_COLOR,
     icons: [
       {
         src: "/brand/android-chrome-192x192.png",

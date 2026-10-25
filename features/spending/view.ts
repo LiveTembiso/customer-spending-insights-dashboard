@@ -1,6 +1,8 @@
 import { z } from "zod";
 
+import { DEFAULT_PERIOD } from "@/lib/periods";
 import { type Period, periodSchema } from "@/lib/schemas";
+import { type ParamSource, readSearchParam } from "@/lib/search-params";
 
 export const MONTH_CHOICES = [6, 12, 24] as const;
 
@@ -16,13 +18,6 @@ export const METRIC_LABELS: Record<Metric, string> = {
   average: "Average transaction",
 };
 
-export const PERIOD_LABELS: Record<Period, string> = {
-  "7d": "7 days",
-  "30d": "30 days",
-  "90d": "90 days",
-  "1y": "1 year",
-};
-
 export interface InsightsView {
   period: Period;
   months: MonthChoice;
@@ -30,19 +25,10 @@ export interface InsightsView {
 }
 
 export const DEFAULT_VIEW: InsightsView = {
-  period: "30d",
+  period: DEFAULT_PERIOD,
   months: 6,
   metric: "total",
 };
-
-type ParamSource =
-  URLSearchParams | Record<string, string | string[] | undefined>;
-
-function read(source: ParamSource, key: string): string | undefined {
-  if (source instanceof URLSearchParams) return source.get(key) ?? undefined;
-  const value = source[key];
-  return Array.isArray(value) ? value[0] : value;
-}
 
 const monthsSchema = z.coerce
   .number()
@@ -52,13 +38,13 @@ const monthsSchema = z.coerce
 export function parseView(source: ParamSource): InsightsView {
   return {
     period:
-      periodSchema.safeParse(read(source, "period")).data ??
+      periodSchema.safeParse(readSearchParam(source, "period")).data ??
       DEFAULT_VIEW.period,
     months:
-      monthsSchema.safeParse(read(source, "months")).data ??
+      monthsSchema.safeParse(readSearchParam(source, "months")).data ??
       DEFAULT_VIEW.months,
     metric:
-      z.enum(METRICS).safeParse(read(source, "metric")).data ??
+      z.enum(METRICS).safeParse(readSearchParam(source, "metric")).data ??
       DEFAULT_VIEW.metric,
   };
 }

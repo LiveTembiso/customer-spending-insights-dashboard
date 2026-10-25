@@ -1,3 +1,12 @@
+import { EmptyState } from "@/components/empty-state";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { SectionCard } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRands } from "@/lib/format";
@@ -59,7 +68,7 @@ export function MonthTableCard({
     return (
       <SectionCard id="month-table-title" title="Month by month">
         {trends ? (
-          <p className="text-sm text-muted-foreground">No spending yet.</p>
+          <EmptyState message="No spending yet." />
         ) : (
           <Skeleton className="h-60 w-full" />
         )}
@@ -123,57 +132,57 @@ export function MonthTableCard({
           ))}
         </ul>
 
-        <div
-          role="region"
-          aria-label="Month by month table, scrollable"
-          tabIndex={0}
-          className="hidden overflow-x-auto lg:block"
-        >
-          <table
+        <div className="hidden lg:block">
+          <Table
+            containerProps={{
+              role: "region",
+              "aria-label": "Month by month table, scrollable",
+              tabIndex: 0,
+            }}
             aria-labelledby="month-table-title"
             className="w-full min-w-[620px] border-collapse text-sm"
           >
-            <thead>
-              <tr className="bg-muted text-left text-[13px] text-muted-foreground">
-                <th
+            <TableHeader>
+              <TableRow className="bg-muted text-left text-[13px] text-muted-foreground">
+                <TableHead
                   scope="col"
                   className="rounded-l-[10px] px-3 py-2.75 font-semibold"
                 >
                   Month
-                </th>
-                <th
+                </TableHead>
+                <TableHead
                   scope="col"
                   className="px-3 py-2.75 text-right font-semibold"
                 >
                   Total spent
-                </th>
-                <th
+                </TableHead>
+                <TableHead
                   scope="col"
                   className="px-3 py-2.75 text-right font-semibold"
                 >
                   vs average
-                </th>
-                <th
+                </TableHead>
+                <TableHead
                   scope="col"
                   className="px-3 py-2.75 text-right font-semibold"
                 >
                   Transactions
-                </th>
-                <th
+                </TableHead>
+                <TableHead
                   scope="col"
                   className="rounded-r-[10px] px-3 py-2.75 text-right font-semibold"
                 >
                   Average transaction
-                </th>
-              </tr>
-            </thead>
-            <tbody className="tabular-nums">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="tabular-nums">
               {rows.map(({ trend, isCurrent, change }) => (
-                <tr
+                <TableRow
                   key={trend.month}
                   className="border-b border-background last:border-0"
                 >
-                  <th scope="row" className="p-3 text-left font-bold">
+                  <TableHead scope="row" className="p-3 text-left font-bold">
                     {monthYear(trend.month)}
                     {isCurrent && (
                       <span className="font-normal text-muted-foreground">
@@ -181,21 +190,23 @@ export function MonthTableCard({
                         · to date
                       </span>
                     )}
-                  </th>
-                  <td className="p-3 text-right font-bold">
+                  </TableHead>
+                  <TableCell className="p-3 text-right font-bold">
                     {formatRands(trend.totalSpent)}
-                  </td>
-                  <td className="p-3 text-right">
+                  </TableCell>
+                  <TableCell className="p-3 text-right">
                     <VsAverage change={change} isCurrent={isCurrent} />
-                  </td>
-                  <td className="p-3 text-right">{trend.transactionCount}</td>
-                  <td className="p-3 text-right">
+                  </TableCell>
+                  <TableCell className="p-3 text-right">
+                    {trend.transactionCount}
+                  </TableCell>
+                  <TableCell className="p-3 text-right">
                     {formatRands(trend.averageTransaction)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </SectionCard>

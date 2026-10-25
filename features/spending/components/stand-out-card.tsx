@@ -1,3 +1,6 @@
+import { EmptyState } from "@/components/empty-state";
+import { Item } from "@/components/ui/item";
+import { buttonVariants } from "@/components/ui/button";
 import {
   MoveRight,
   TrendingDown,
@@ -55,7 +58,8 @@ function NoteItem({
   action?: ReactNode;
 }) {
   return (
-    <li
+    <Item
+      render={<li />}
       className={cn(
         "flex items-start gap-3 rounded-[14px] p-3.5 sm:rounded-[16px] sm:p-4",
         warning
@@ -78,7 +82,7 @@ function NoteItem({
         </p>
         {action}
       </div>
-    </li>
+    </Item>
   );
 }
 
@@ -110,7 +114,10 @@ function render(note: Note) {
           goal && (
             <Link
               href="/goals"
-              className="mt-2 flex min-h-11 items-center rounded-[12px] border-[1.5px] border-navy px-3.5 text-sm font-bold text-navy hover:bg-card"
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "mt-2 flex min-h-11 items-center rounded-[12px] border-[1.5px] border-navy bg-transparent px-3.5 text-sm font-bold text-navy hover:bg-card",
+              )}
             >
               Review goal{" "}
               <span className="sr-only">for {category.name.toLowerCase()}</span>
@@ -185,9 +192,7 @@ export function StandOutCard({
           <Skeleton className="h-20 w-full" />
         </div>
       ) : notes.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nothing to point out yet.
-        </p>
+        <EmptyState message="Nothing to point out yet." />
       ) : (
         <ul
           aria-busy={stale || undefined}

@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+import { Card as UiCard } from "@/components/ui/card";
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +31,8 @@ const spoken = (change: number) =>
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <section
+    <UiCard
+      role="region"
       aria-labelledby="month-spend-title"
       className="relative overflow-hidden rounded-[22px] bg-navy p-5 text-navy-foreground sm:p-6"
     >
@@ -40,7 +43,7 @@ function Card({ children }: { children: React.ReactNode }) {
       <div className="relative grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto]">
         {children}
       </div>
-    </section>
+    </UiCard>
   );
 }
 
@@ -71,11 +74,11 @@ export async function MonthSpendCard() {
           </p>
         ) : (
           <p className="flex flex-wrap items-center gap-2 text-sm text-navy-muted">
-            <span className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground tabular-nums">
+            <Badge className="inline-flex h-auto items-center gap-1 rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground tabular-nums">
               <Direction change={spentChange} />
               <span className="sr-only">{spoken(spentChange)}</span>
               {formatPercent(spentChange)}
-            </span>
+            </Badge>
             <span aria-hidden>vs {shortRange}</span>
             <span className="sr-only">
               compared with {longRange} last month

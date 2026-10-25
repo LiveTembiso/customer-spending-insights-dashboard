@@ -1,14 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { normalizedText as text } from "@/test-utils/text";
+
 import { CategoryDonut, DonutTotal, holeFontSize } from "./category-donut";
 
 const slices = [
   { name: "Groceries", amount: 1250.3, percentage: 73.2, color: "#FF6B6B" },
   { name: "Utilities", amount: 458.7, percentage: 26.8, color: "#85C1E9" },
 ];
-
-const text = (element: Element) => element.textContent?.replace(/\s/g, " ");
 
 function renderDonut(label?: string) {
   const view = render(

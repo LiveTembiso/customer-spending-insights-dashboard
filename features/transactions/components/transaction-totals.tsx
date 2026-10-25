@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CategoryName } from "@/features/categories/schemas";
 import type { CategoriesResponse } from "@/features/spending/schemas";
@@ -29,7 +30,7 @@ function spendFor(totals: CategoriesResponse, category?: CategoryName) {
 }
 
 const tile =
-  "relative flex min-w-0 flex-col gap-1 sm:gap-1.5 sm:rounded-[18px] sm:px-5 sm:py-4";
+  "relative flex min-w-0 flex-col gap-1 rounded-none bg-transparent p-0 text-inherit sm:gap-1.5 sm:rounded-[18px] sm:px-5 sm:py-4";
 const whiteTile = "sm:bg-card sm:text-foreground";
 const label = "text-xs text-navy-muted sm:text-[13px]";
 const whiteLabel = "sm:text-muted-foreground";
@@ -59,7 +60,8 @@ export function TransactionTotals({
   const spend = totals && !searching ? spendFor(totals, category) : undefined;
 
   return (
-    <section
+    <Card
+      role="region"
       aria-label="Totals for these filters"
       className={cn(
         "relative grid items-start gap-4 overflow-hidden rounded-[18px] bg-navy px-4.5 py-4 text-navy-foreground sm:items-stretch sm:gap-3 sm:overflow-visible sm:rounded-none sm:bg-transparent sm:p-0",
@@ -67,7 +69,7 @@ export function TransactionTotals({
       )}
     >
       {!searching && (
-        <div
+        <Card
           className={cn(
             tile,
             "col-span-2 max-sm:static max-sm:border-b max-sm:border-white/15 max-sm:pb-3 sm:overflow-hidden sm:bg-navy lg:col-span-1",
@@ -85,14 +87,14 @@ export function TransactionTotals({
           ) : (
             <Figure failed={totalsFailed} />
           )}
-        </div>
+        </Card>
       )}
-      <div className={cn(tile, whiteTile)}>
+      <Card className={cn(tile, whiteTile)}>
         <span className={cn(label, whiteLabel)}>Transactions</span>
         <Figure value={count === undefined ? undefined : String(count)} />
-      </div>
+      </Card>
       {!searching && (
-        <div className={cn(tile, whiteTile)}>
+        <Card className={cn(tile, whiteTile)}>
           <span className={cn(label, whiteLabel)}>
             <span className="sm:hidden">Average</span>
             <span className="max-sm:hidden">Average per transaction</span>
@@ -103,8 +105,8 @@ export function TransactionTotals({
               spend && formatRands(spend.count ? spend.amount / spend.count : 0)
             }
           />
-        </div>
+        </Card>
       )}
-    </section>
+    </Card>
   );
 }

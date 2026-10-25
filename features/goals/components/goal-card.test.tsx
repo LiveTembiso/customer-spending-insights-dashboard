@@ -1,19 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { makeWarningGoal as goal } from "@/test-utils/fixtures";
+import { normalizedText as text } from "@/test-utils/text";
+
 import type { Goal } from "../schemas";
 import { GoalCard } from "./goal-card";
-
-const goal = (overrides: Partial<Goal>): Goal => ({
-  id: "goal_001",
-  category: "Groceries",
-  monthlyBudget: 5500,
-  currentSpent: 4473.12,
-  percentageUsed: 81.3,
-  daysRemaining: 11,
-  status: "warning",
-  ...overrides,
-});
 
 function renderCard(overrides: Partial<Goal> = {}, monthElapsed = 64.5) {
   return render(
@@ -26,7 +18,6 @@ function renderCard(overrides: Partial<Goal> = {}, monthElapsed = 64.5) {
 }
 
 const card = () => screen.getByRole("region");
-const text = (element: HTMLElement) => element.textContent?.replace(/\s/g, " ");
 
 describe("GoalCard", () => {
   it("says what's left and what that allows per day, rounded down", () => {
@@ -52,10 +43,11 @@ describe("GoalCard", () => {
   it("describes the bar and the even-pace marker in words", () => {
     renderCard();
     expect(
-      screen.getByRole("img", {
-        name: "81 percent of the groceries budget used. Spending evenly, you'd be at 65 percent by today.",
-      }),
-    ).toBeInTheDocument();
+      screen.getByRole("progressbar", { name: "Groceries budget used" }),
+    ).toHaveAttribute(
+      "aria-valuetext",
+      "81 percent used. Spending evenly, you'd be at 65 percent by today.",
+    );
   });
 
   it("shows an overspend instead of what's left, with the bar full", () => {
@@ -67,9 +59,12 @@ describe("GoalCard", () => {
     expect(text(card())).toContain("R120.40 over budget");
     expect(text(card())).toContain("Over budget with 11 days still to go.");
     expect(screen.getByText("Over budget")).toBeInTheDocument();
-    expect(screen.getByRole("img").firstElementChild).toHaveStyle({
-      width: "100%",
-    });
+    const bar = screen.getByRole("progressbar");
+    expect(bar).toHaveAttribute("aria-valuenow", "100");
+    expect(bar).toHaveAttribute(
+      "aria-valuetext",
+      expect.stringContaining("102 percent used"),
+    );
   });
 
   it("says so when a budget is used up exactly", () => {
