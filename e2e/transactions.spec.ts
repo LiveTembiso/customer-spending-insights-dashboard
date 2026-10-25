@@ -111,6 +111,64 @@ test.describe("transactions", () => {
     ).toHaveText("22 Sep 2026 – 12 Oct 2026");
   });
 
+  test("keeps the date picker and arrows still while browsing months", async ({
+    page,
+    isMobile,
+  }) => {
+    if (!isMobile) await page.setViewportSize({ width: 1366, height: 900 });
+    await page.goto(
+      "/transactions?period=custom&from=2026-09-21&to=2026-10-20",
+    );
+    await page
+      .getByRole("button", { name: "Custom range", exact: true })
+      .click();
+    const picker = page.getByRole("dialog", { name: "Custom date range" });
+    await expect(picker).toBeVisible();
+    await picker.evaluate(async (element) => {
+      await Promise.all(
+        element.getAnimations().map((animation) => animation.finished),
+      );
+    });
+    const initial = await picker.boundingBox();
+    const previous = picker.getByRole("button", {
+      name: "Go to the Previous Month",
+    });
+    const next = picker.getByRole("button", { name: "Go to the Next Month" });
+    const previousPosition = await previous.boundingBox();
+    const nextPosition = await next.boundingBox();
+    for (const direction of [
+      previous,
+      previous,
+      previous,
+      previous,
+      next,
+      next,
+      next,
+      next,
+    ]) {
+      const month = picker
+        .getByRole("combobox", { name: "Choose the Month" })
+        .first();
+      const originalMonth = await month.textContent();
+      await direction.click();
+      await expect(month).not.toHaveText(originalMonth!);
+      await expect(async () => {
+        const current = await picker.boundingBox();
+        for (const key of ["x", "y", "width", "height"] as const) {
+          expect(Math.abs(current![key] - initial![key])).toBeLessThan(1);
+        }
+        for (const [arrow, original] of [
+          [previous, previousPosition],
+          [next, nextPosition],
+        ] as const) {
+          const position = await arrow.boundingBox();
+          expect(Math.abs(position!.x - original!.x)).toBeLessThan(1);
+          expect(Math.abs(position!.y - original!.y)).toBeLessThan(1);
+        }
+      }).toPass({ timeout: 1000 });
+    }
+  });
+
   test("jumps to different years and months in each calendar", async ({
     page,
   }) => {

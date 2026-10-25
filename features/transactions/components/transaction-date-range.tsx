@@ -111,6 +111,7 @@ function RangeEditor({
         <Calendar
           mode="range"
           numberOfMonths={2}
+          fixedWeeks
           captionLayout="dropdown"
           reverseYears
           components={{ Dropdown: RangeCalendarDropdown }}
