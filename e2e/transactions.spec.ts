@@ -9,9 +9,20 @@ const visibleRowButtons = (page: Page) =>
     .filter({ visible: true });
 
 test.describe("transactions", () => {
-  test("filters by category and keeps it in the link", async ({ page }) => {
+  test("filters by category and keeps it in the link", async ({
+    page,
+    isMobile,
+  }) => {
     await page.goto("/transactions");
-    await page.getByRole("button", { name: "Groceries", exact: true }).click();
+    if (isMobile) {
+      await page
+        .getByRole("combobox", { name: "Category" })
+        .selectOption("Groceries");
+    } else {
+      await page
+        .getByRole("button", { name: "Groceries", exact: true })
+        .click();
+    }
 
     await expect(page).toHaveURL(/category=Groceries/);
     await expect(
@@ -19,13 +30,19 @@ test.describe("transactions", () => {
     ).toBeVisible();
 
     await page.reload();
-    await expect(
-      page.getByRole("button", {
-        name: "Groceries",
-        exact: true,
-        pressed: true,
-      }),
-    ).toBeVisible();
+    if (isMobile) {
+      await expect(
+        page.getByRole("combobox", { name: "Category" }),
+      ).toHaveValue("Groceries");
+    } else {
+      await expect(
+        page.getByRole("button", {
+          name: "Groceries",
+          exact: true,
+          pressed: true,
+        }),
+      ).toBeVisible();
+    }
   });
 
   test("changes the period", async ({ page }) => {

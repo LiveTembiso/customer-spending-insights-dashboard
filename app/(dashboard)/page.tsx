@@ -39,7 +39,7 @@ export default function OverviewPage() {
         </Suspense>
       </section>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4">
         <Suspense fallback={<SectionCardSkeleton lines={6} />}>
           <CategoryBreakdownCard />
         </Suspense>

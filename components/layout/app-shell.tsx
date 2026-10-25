@@ -34,7 +34,7 @@ export function AppShell({
         <main
           id="main"
           tabIndex={-1}
-          className="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 pt-4 pb-28 outline-none md:px-8 md:pt-7 md:pb-12"
+          className="mx-auto flex w-full max-w-[1200px] flex-col gap-4 px-4 pt-4 pb-[calc(7rem+env(safe-area-inset-bottom))] outline-none md:px-8 md:pt-7 md:pb-12"
         >
           {children}
         </main>

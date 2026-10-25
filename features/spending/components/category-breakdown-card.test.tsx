@@ -46,8 +46,24 @@ describe("CategoryBreakdownCard", () => {
     expect(chart.getAttribute("aria-label")?.replace(/\s/g, " ")).toBe(
       "Spending by category this month: Groceries R100.00 (100.0%). Total R100.00.",
     );
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    expect(screen.getByRole("list")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /^Dining/ }),
+    ).not.toBeInTheDocument();
     expect(screen.getByText("1 category")).toBeInTheDocument();
+  });
+
+  it("links each visible category to its purchases for the same dates", async () => {
+    await renderCard([category("Groceries", 100, 100)]);
+
+    expect(
+      screen.getByRole("link", {
+        name: /Groceries R100.00.*View transactions/,
+      }),
+    ).toHaveAttribute(
+      "href",
+      "/transactions?category=Groceries&period=custom&from=2026-10-01&to=2026-10-18",
+    );
   });
 
   it("counts the categories in the middle of the donut", async () => {

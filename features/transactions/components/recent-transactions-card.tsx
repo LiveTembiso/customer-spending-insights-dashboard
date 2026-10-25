@@ -27,7 +27,7 @@ export async function RecentTransactionsCard() {
         <p className="text-sm text-muted-foreground">No transactions yet.</p>
       ) : (
         <>
-          <ul className="flex flex-col md:hidden">
+          <ul className="flex flex-col lg:hidden">
             {transactions.map((transaction) => (
               <li
                 key={transaction.id}
@@ -52,7 +52,7 @@ export async function RecentTransactionsCard() {
 
           <table
             aria-labelledby="recent-title"
-            className="hidden w-full border-collapse text-sm md:table"
+            className="hidden w-full border-collapse text-sm lg:table"
           >
             <thead>
               <tr className="bg-muted text-left text-[13px] text-muted-foreground">

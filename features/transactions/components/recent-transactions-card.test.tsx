@@ -56,4 +56,10 @@ describe("RecentTransactionsCard", () => {
     await renderCard([]);
     expect(screen.getByText("No transactions yet.")).toBeInTheDocument();
   });
+
+  it("leaves the card out when the customer is unavailable", async () => {
+    vi.mocked(getCurrentRecentTransactions).mockResolvedValue(undefined);
+    const { container } = render(await RecentTransactionsCard());
+    expect(container).toBeEmptyDOMElement();
+  });
 });
