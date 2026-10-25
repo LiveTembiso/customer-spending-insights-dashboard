@@ -245,7 +245,7 @@ export function TransactionDetailsDialog({
       }}
       className="mx-0 mt-auto mb-0 max-h-[90dvh] w-full max-w-none rounded-t-[24px] bg-card p-0 text-foreground backdrop:bg-navy/55 md:m-auto md:max-w-md md:rounded-[22px]"
     >
-      <div className="px-5 pt-3 pb-8 md:p-6">
+      <div className="px-5 pt-3 pb-[calc(2rem+env(safe-area-inset-bottom))] md:p-6">
         <span
           aria-hidden
           className="mx-auto mb-2 block h-1 w-10 rounded-full bg-input md:hidden"

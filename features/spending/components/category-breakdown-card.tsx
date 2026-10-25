@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import { SectionCard } from "@/components/layout/section-card";
+import { CategoryDot } from "@/features/categories/components/category-dot";
 import { formatDayRange, formatRands } from "@/lib/format";
 
 import { getCurrentMonthCategories } from "../server/current";
@@ -31,7 +34,7 @@ export async function CategoryBreakdownCard() {
       {spent.length === 0 ? (
         <p className="text-sm text-muted-foreground">No spending yet.</p>
       ) : (
-        <div className="flex justify-center py-2">
+        <div className="flex flex-col items-center gap-4">
           <CategoryDonut
             slices={spent}
             size={180}
@@ -43,6 +46,39 @@ export async function CategoryBreakdownCard() {
               caption={`${spent.length} ${spent.length === 1 ? "category" : "categories"}`}
             />
           </CategoryDonut>
+          <ul className="grid w-full grid-cols-2 gap-x-3 gap-y-1">
+            {spent.map((category) => (
+              <li key={category.name} className="min-w-0">
+                <Link
+                  href={{
+                    pathname: "/transactions",
+                    query: {
+                      category: category.name,
+                      period: "custom",
+                      from: startDate,
+                      to: endDate,
+                    },
+                  }}
+                  className="flex min-h-11 items-start gap-2 rounded-lg py-2 text-[13px] hover:bg-muted focus-visible:bg-muted"
+                >
+                  <CategoryDot color={category.color} className="mt-1" />
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="font-semibold break-words text-primary">
+                      {category.name}
+                    </span>{" "}
+                    <span className="text-xs text-muted-foreground tabular-nums">
+                      {formatRands(category.amount)}
+                      <span className="sr-only">
+                        {" "}
+                        · {category.percentage.toFixed(1)}% of spending. View
+                        transactions.
+                      </span>
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </SectionCard>

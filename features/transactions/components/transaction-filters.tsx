@@ -73,7 +73,7 @@ export function TransactionFiltersPanel({
       </div>
       <div className="flex flex-col items-start gap-2 md:flex-row md:justify-between md:gap-3">
         {options && (
-          <CategoryChips
+          <CategoryFilter
             selected={filters.category}
             categories={options.categories}
             onChange={onChange}
@@ -259,10 +259,10 @@ function CustomRange({
   }
 
   return (
-    <fieldset className="flex flex-col gap-2">
+    <fieldset className="flex min-w-0 flex-col gap-2">
       <legend className="sr-only">Custom range</legend>
-      <div className="flex flex-wrap gap-3">
-        <div className="flex flex-1 flex-col gap-1.5 sm:flex-none">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <label htmlFor="range-start" className={fieldLabel}>
             From
           </label>
@@ -277,10 +277,10 @@ function CustomRange({
             onChange={(event) =>
               update({ ...draft, start: event.target.value })
             }
-            className={control}
+            className={cn(control, "w-full min-w-0 px-2 tabular-nums")}
           />
         </div>
-        <div className="flex flex-1 flex-col gap-1.5 sm:flex-none">
+        <div className="flex min-w-0 flex-col gap-1.5">
           <label htmlFor="range-end" className={fieldLabel}>
             To
           </label>
@@ -293,7 +293,7 @@ function CustomRange({
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? "range-error" : undefined}
             onChange={(event) => update({ ...draft, end: event.target.value })}
-            className={control}
+            className={cn(control, "w-full min-w-0 px-2 tabular-nums")}
           />
         </div>
       </div>
@@ -337,7 +337,7 @@ function SortField({
   );
 }
 
-function CategoryChips({
+function CategoryFilter({
   selected,
   categories,
   onChange,
@@ -358,44 +358,69 @@ function CategoryChips({
     );
 
   return (
-    <div
-      role="group"
-      aria-label="Category"
-      className="-mx-4 flex gap-1.5 self-stretch overflow-x-auto px-4 pb-0.5 md:mx-0 md:min-w-0 md:flex-1 md:flex-wrap md:gap-2 md:overflow-visible md:px-0"
-    >
-      <button
-        type="button"
-        aria-pressed={!selected}
-        onClick={() => onChange({ category: undefined })}
-        className={chip(!selected)}
+    <>
+      <div className="flex w-full flex-col gap-1.5 md:hidden">
+        <label htmlFor="transaction-category" className={fieldLabel}>
+          Category
+        </label>
+        <NativeSelect
+          id="transaction-category"
+          value={selected ?? ""}
+          onChange={(event) =>
+            onChange({
+              category:
+                (event.target.value as TransactionFilters["category"]) ||
+                undefined,
+            })
+          }
+        >
+          <option value="">All categories</option>
+          {categories.map((category) => (
+            <option key={category.name} value={category.name}>
+              {category.name}
+            </option>
+          ))}
+        </NativeSelect>
+      </div>
+      <div
+        role="group"
+        aria-label="Category"
+        className="hidden min-w-0 flex-1 flex-wrap gap-2 md:flex"
       >
-        All
-      </button>
-      {categories.map((category) => {
-        const pressed = category.name === selected;
-        return (
-          <button
-            key={category.name}
-            type="button"
-            aria-pressed={pressed}
-            onClick={() =>
-              onChange({ category: pressed ? undefined : category.name })
-            }
-            className={cn(chip(pressed), pressed && "pr-3")}
-          >
-            <CategoryDot
-              color={category.color}
-              className={cn(
-                pressed && "shadow-[0_0_0_1.5px_rgba(255,255,255,0.7)]",
+        <button
+          type="button"
+          aria-pressed={!selected}
+          onClick={() => onChange({ category: undefined })}
+          className={chip(!selected)}
+        >
+          All
+        </button>
+        {categories.map((category) => {
+          const pressed = category.name === selected;
+          return (
+            <button
+              key={category.name}
+              type="button"
+              aria-pressed={pressed}
+              onClick={() =>
+                onChange({ category: pressed ? undefined : category.name })
+              }
+              className={cn(chip(pressed), pressed && "pr-3")}
+            >
+              <CategoryDot
+                color={category.color}
+                className={cn(
+                  pressed && "shadow-[0_0_0_1.5px_rgba(255,255,255,0.7)]",
+                )}
+              />
+              {category.name}
+              {pressed && (
+                <X aria-hidden className="size-3.5" strokeWidth={2.5} />
               )}
-            />
-            {category.name}
-            {pressed && (
-              <X aria-hidden className="size-3.5" strokeWidth={2.5} />
-            )}
-          </button>
-        );
-      })}
-    </div>
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }

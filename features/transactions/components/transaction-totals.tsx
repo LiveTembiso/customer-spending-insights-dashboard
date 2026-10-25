@@ -34,7 +34,7 @@ const whiteTile = "sm:bg-card sm:text-foreground";
 const label = "text-xs text-navy-muted sm:text-[13px]";
 const whiteLabel = "sm:text-muted-foreground";
 const figure =
-  "text-[17px] leading-[1.1] font-extrabold tracking-tight tabular-nums sm:text-[28px]";
+  "text-xl leading-[1.1] font-extrabold tracking-tight tabular-nums sm:text-[28px]";
 
 function Figure({ value, failed }: { value?: string; failed?: boolean }) {
   if (value !== undefined) return <span className={figure}>{value}</span>;
@@ -62,15 +62,15 @@ export function TransactionTotals({
     <section
       aria-label="Totals for these filters"
       className={cn(
-        "relative grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-4 overflow-hidden rounded-[18px] bg-navy px-4.5 py-4 text-navy-foreground sm:items-stretch sm:gap-3 sm:overflow-visible sm:rounded-none sm:bg-transparent sm:p-0",
-        searching ? "sm:grid-cols-1" : "sm:grid-cols-2 lg:grid-cols-3",
+        "relative grid items-start gap-4 overflow-hidden rounded-[18px] bg-navy px-4.5 py-4 text-navy-foreground sm:items-stretch sm:gap-3 sm:overflow-visible sm:rounded-none sm:bg-transparent sm:p-0",
+        searching ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3",
       )}
     >
       {!searching && (
         <div
           className={cn(
             tile,
-            "max-sm:static sm:col-span-2 sm:overflow-hidden sm:bg-navy lg:col-span-1",
+            "col-span-2 max-sm:static max-sm:border-b max-sm:border-white/15 max-sm:pb-3 sm:overflow-hidden sm:bg-navy lg:col-span-1",
           )}
         >
           <span
