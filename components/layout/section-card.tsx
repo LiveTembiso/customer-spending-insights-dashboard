@@ -68,7 +68,7 @@ export function SectionCard({
           </CardAction>
         )}
       </CardHeader>
-      <CardContent className="flex min-w-0 flex-col gap-4 p-0">
+      <CardContent className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 p-0">
         {children}
       </CardContent>
     </Card>

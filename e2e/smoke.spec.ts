@@ -38,6 +38,59 @@ test("opens spending insights from the overview", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("monthly spending fills its card at phone, tablet and desktop widths", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const card = page.getByRole("region", {
+    name: "Monthly spending",
+    exact: true,
+  });
+  await expect(
+    card.getByRole("img", { name: /^Monthly spending/ }),
+  ).toBeVisible();
+
+  for (const width of [360, 768, 1366, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(async () => {
+      const layout = await card.evaluate((element) => {
+        const content = element.querySelector('[data-slot="card-content"]')!;
+        const chart = element.querySelector('[role="img"]')!;
+        const svg = chart.querySelector(".recharts-surface")!;
+        const cardBox = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const contentBox = content.getBoundingClientRect();
+        const chartBox = chart.getBoundingClientRect();
+        const svgBox = svg.getBoundingClientRect();
+        return {
+          availableWidth:
+            cardBox.width -
+            parseFloat(style.paddingLeft) -
+            parseFloat(style.paddingRight),
+          bottom: cardBox.bottom - parseFloat(style.paddingBottom),
+          contentWidth: contentBox.width,
+          contentBottom: contentBox.bottom,
+          contentHeight: contentBox.height,
+          chartWidth: chartBox.width,
+          chartHeight: chartBox.height,
+          svgWidth: svgBox.width,
+          svgHeight: svgBox.height,
+        };
+      });
+      expect(
+        Math.abs(layout.contentWidth - layout.availableWidth),
+      ).toBeLessThan(1);
+      expect(Math.abs(layout.contentBottom - layout.bottom)).toBeLessThan(1);
+      expect(Math.abs(layout.chartWidth - layout.contentWidth)).toBeLessThan(1);
+      expect(Math.abs(layout.chartHeight - layout.contentHeight)).toBeLessThan(
+        1,
+      );
+      expect(Math.abs(layout.svgWidth - layout.chartWidth)).toBeLessThan(1);
+      expect(Math.abs(layout.svgHeight - layout.chartHeight)).toBeLessThan(1);
+    }).toPass();
+  }
+});
+
 test("custom date fields fit side by side on a phone", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/transactions");

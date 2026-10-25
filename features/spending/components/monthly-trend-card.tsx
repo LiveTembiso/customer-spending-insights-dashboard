@@ -51,7 +51,7 @@ export async function MonthlyTrendCard() {
         top={top}
         metric="total"
         label={`Monthly spending, ${formatMonthLong(first.month)} to ${formatMonthLong(last.month)}: ${summary}`}
-        className="min-h-52 flex-1"
+        className="min-h-52 w-full flex-1"
       />
     </SectionCard>
   );
