@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { expect, type Page, test } from "@playwright/test";
 
+import { selectOption } from "./helpers/select";
 import { expectCategorySelected } from "./helpers/transactions";
 
 const visibleRowButtons = (page: Page) =>
@@ -13,9 +14,7 @@ const visibleRowButtons = (page: Page) =>
 test.describe("transactions", () => {
   test("filters by category and keeps it in the link", async ({ page }) => {
     await page.goto("/transactions");
-    await page
-      .getByRole("combobox", { name: "Category" })
-      .selectOption("Groceries");
+    await selectOption(page, "Category", "Groceries");
 
     await expect(page).toHaveURL(/category=Groceries/);
     await expect(
@@ -47,14 +46,152 @@ test.describe("transactions", () => {
     await expect(page.getByText("Spent", { exact: true })).toHaveCount(0);
   });
 
+  test("selects a two-month range, applies it and returns focus", async ({
+    page,
+  }) => {
+    await page.goto(
+      "/transactions?period=custom&from=2026-09-21&to=2026-10-20",
+    );
+    const originalUrl = page.url();
+    const trigger = page.getByRole("button", {
+      name: "Custom range",
+      exact: true,
+    });
+    await trigger.click();
+    const picker = page.getByRole("dialog", { name: "Custom date range" });
+    await expect(picker).toBeVisible();
+    const calendars = picker.getByRole("grid");
+    await expect(calendars).toHaveCount(2);
+    await expect(picker).not.toHaveAttribute("data-starting-style", "");
+    await picker.evaluate(async (element) => {
+      await Promise.all(
+        element.getAnimations().map((animation) => animation.finished),
+      );
+    });
+    const bounds = await picker.boundingBox();
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.y).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+      page.viewportSize()!.width,
+    );
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(
+      page.viewportSize()!.height,
+    );
+    const firstMonth = await calendars.nth(0).boundingBox();
+    const secondMonth = await calendars.nth(1).boundingBox();
+    if (page.viewportSize()!.width < 768) {
+      await expect(picker).toHaveAttribute("data-slot", "sheet-content");
+      expect(secondMonth!.y).toBeGreaterThan(firstMonth!.y);
+    } else {
+      await expect(picker).toHaveAttribute("data-slot", "popover-content");
+      expect(Math.abs(firstMonth!.y - secondMonth!.y)).toBeLessThan(1);
+      expect(secondMonth!.x).toBeGreaterThan(firstMonth!.x);
+    }
+    await picker.getByRole("button", { name: /September 22/ }).click();
+    await expect(
+      picker.getByRole("button", { name: "Apply range" }),
+    ).toBeDisabled();
+    await picker.getByRole("button", { name: /October 12/ }).click();
+    const from = "2026-09-22";
+    const to = "2026-10-12";
+    expect(page.url()).toBe(originalUrl);
+    await picker.getByRole("button", { name: "Apply range" }).click();
+    await expect(picker).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await expect(async () => {
+      const params = new URL(page.url()).searchParams;
+      expect(params.get("period")).toBe("custom");
+      expect(params.get("from")).toBe(from);
+      expect(params.get("to")).toBe(to);
+    }).toPass();
+    await page.reload();
+    await trigger.click();
+    await expect(
+      picker.getByRole("status", { name: "Selected date range" }),
+    ).toHaveText("22 Sep 2026 – 12 Oct 2026");
+  });
+
+  test("jumps to different years and months in each calendar", async ({
+    page,
+  }) => {
+    await page.goto("/transactions");
+    const originalUrl = page.url();
+    await page
+      .getByRole("button", { name: "Custom range", exact: true })
+      .click();
+    await selectOption(page, "Choose the Year", "2020");
+    await selectOption(page, "Choose the Month", "February");
+    const picker = page.getByRole("dialog", { name: "Custom date range" });
+    await picker.getByRole("button", { name: /February 10/ }).click();
+    await selectOption(page, "Choose the Year", "2021", 1);
+    await selectOption(page, "Choose the Month", "June", 1);
+    await picker.getByRole("button", { name: /June 12/ }).click();
+    await expect(
+      picker.getByRole("status", { name: "Selected date range" }),
+    ).toHaveText("10 Feb 2020 – 12 Jun 2021");
+    expect(page.url()).toBe(originalUrl);
+    await picker.getByRole("button", { name: "Apply range" }).click();
+    await expect(page).toHaveURL(/from=2020-02-10&to=2021-06-12/);
+  });
+
+  test("discards an unfinished range on Cancel and Escape", async ({
+    page,
+  }) => {
+    await page.goto("/transactions?period=7d");
+    const originalUrl = page.url();
+    const trigger = page.getByRole("button", {
+      name: "Custom range",
+      exact: true,
+    });
+    for (const action of ["Cancel", "Escape"]) {
+      await trigger.click();
+      const picker = page.getByRole("dialog", { name: "Custom date range" });
+      const summary = picker.getByRole("status", {
+        name: "Selected date range",
+      });
+      const appliedRange = await summary.textContent();
+      await picker
+        .getByRole("grid")
+        .first()
+        .locator("button[data-day]:enabled")
+        .first()
+        .click();
+      if (action === "Cancel")
+        await picker
+          .getByRole("button", { name: "Cancel", exact: true })
+          .click();
+      else await page.keyboard.press("Escape");
+      await expect(picker).toBeHidden();
+      await expect(trigger).toBeFocused();
+      expect(page.url()).toBe(originalUrl);
+      await trigger.click();
+      await expect(summary).toHaveText(appliedRange!);
+      await picker.getByRole("button", { name: "Close date picker" }).click();
+    }
+  });
+
+  test("moves between periods with the keyboard", async ({ page }) => {
+    await page.goto("/transactions?period=7d");
+    const week = page.getByRole("button", { name: /Last 7 days/ });
+    const month = page.getByRole("button", { name: /Last 30 days/ });
+    await week.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(month).toBeFocused();
+    await page.keyboard.press("Space");
+    await expect(month).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByText(/^Last 30 days · /)).toBeVisible();
+  });
+
   test("opens a transaction's details", async ({ page }) => {
     await page.goto("/transactions");
-    await visibleRowButtons(page).first().click();
+    const row = visibleRowButtons(page).first();
+    await row.click();
 
     const details = page.getByRole("heading", { name: "Transaction details" });
     await expect(details).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(details).toBeHidden();
+    await expect(row).toBeFocused();
   });
 });
 
@@ -72,7 +209,10 @@ test.describe("transactions on a wide screen", () => {
           name: "Filters",
           exact: true,
         });
-        const search = await panel.getByRole("searchbox").boundingBox();
+        const search = await panel
+          .getByRole("search")
+          .locator('[data-slot="input-group"]')
+          .boundingBox();
         const period = await panel
           .getByRole("group", { name: "Period" })
           .boundingBox();
@@ -88,6 +228,8 @@ test.describe("transactions on a wide screen", () => {
         expect(category).not.toBeNull();
         expect(sort).not.toBeNull();
         expect(search!.y + search!.height).toBeLessThan(period!.y);
+        expect(Math.abs(period!.height - category!.height)).toBeLessThan(1);
+        expect(Math.abs(category!.height - sort!.height)).toBeLessThan(1);
         expect(Math.abs(period!.y - category!.y)).toBeLessThan(1);
         expect(Math.abs(category!.y - sort!.y)).toBeLessThan(1);
         expect(Math.abs(search!.x - period!.x)).toBeLessThan(1);

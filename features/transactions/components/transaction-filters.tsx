@@ -1,22 +1,28 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
+
+import { Button } from "@/components/ui/button";
+
+import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CalendarDays, Search } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
-import { NativeSelect } from "@/components/ui/native-select";
+import { SelectField } from "@/components/select-field";
 import type { FiltersResponse } from "@/features/categories/schemas";
 import type { DayKey } from "@/lib/dates";
-import { formatDay } from "@/lib/format";
 import { cn, pressedInForcedColors } from "@/lib/utils";
 
 import { MAX_SEARCH_LENGTH } from "../constants";
-import {
-  EARLIEST_DAY,
-  filtersRange,
-  SORT_LABELS,
-  type TransactionFilters,
-} from "../filters";
+import { filtersRange, SORT_LABELS, type TransactionFilters } from "../filters";
 import { SORT_OPTIONS, type SortBy } from "../schemas";
+import { TransactionDateRange } from "./transaction-date-range";
 
 const SEARCH_DELAY_MS = 300;
 
@@ -36,8 +42,6 @@ interface TransactionFiltersPanelProps {
 }
 
 const fieldLabel = "text-xs font-semibold text-muted-foreground";
-const control =
-  "min-h-11 rounded-[10px] border border-input bg-card px-3 text-base text-foreground md:text-sm";
 
 export function TransactionFiltersPanel({
   filters,
@@ -48,7 +52,8 @@ export function TransactionFiltersPanel({
   resetCount,
 }: TransactionFiltersPanelProps) {
   return (
-    <section
+    <Card
+      role="region"
       aria-label="Filters"
       className="@container flex flex-col gap-3 rounded-[18px] bg-card p-3 md:rounded-[22px] md:p-4"
     >
@@ -61,13 +66,6 @@ export function TransactionFiltersPanel({
             presets={options?.dateRangePresets ?? []}
             onChange={onChange}
           />
-          {filters.period === "custom" && (
-            <CustomRange
-              range={filtersRange(filters, today)}
-              today={today}
-              onChange={onChange}
-            />
-          )}
         </div>
         {options && (
           <CategoryFilter
@@ -79,17 +77,18 @@ export function TransactionFiltersPanel({
         <div className="flex min-w-0 flex-col items-stretch gap-1">
           <SortField value={filters.sortBy} onChange={onChange} />
           {onReset && (
-            <button
+            <Button
+              variant="ghost"
               type="button"
               onClick={onReset}
               className="min-h-11 self-end px-1 text-sm font-bold text-primary hover:text-primary-hover"
             >
               Clear filters
-            </button>
+            </Button>
           )}
         </div>
       </div>
-    </section>
+    </Card>
   );
 }
 
@@ -132,15 +131,14 @@ function SearchField({
         onChange({ q: next }, { replace: true });
       }}
     >
-      <label htmlFor="transaction-search" className={fieldLabel}>
+      <FieldLabel htmlFor="transaction-search" className={fieldLabel}>
         Search
-      </label>
-      <div className="relative">
-        <Search
-          aria-hidden
-          className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
-        />
-        <input
+      </FieldLabel>
+      <InputGroup className="h-11 rounded-[10px] bg-card">
+        <InputGroupAddon className="pl-3.5">
+          <Search aria-hidden className="size-4" />
+        </InputGroupAddon>
+        <InputGroupInput
           id="transaction-search"
           type="search"
           value={draft}
@@ -148,12 +146,9 @@ function SearchField({
           placeholder="Merchant or description"
           maxLength={MAX_SEARCH_LENGTH}
           autoComplete="off"
-          className={cn(
-            control,
-            "w-full pl-10 placeholder:text-muted-foreground",
-          )}
+          className="h-full text-base md:text-sm"
         />
-      </div>
+      </InputGroup>
     </form>
   );
 }
@@ -172,135 +167,60 @@ function PeriodControl({
   const labelId = useId();
   const segment = (pressed: boolean) =>
     cn(
-      "flex min-h-11 items-center justify-center gap-1.5 rounded-[9px] border border-transparent px-3 text-[13px] whitespace-nowrap",
+      "flex h-full min-h-0 items-center justify-center gap-1.5 rounded-[9px] border border-transparent px-3 text-[13px] whitespace-nowrap",
       pressed
-        ? cn("bg-navy font-bold text-navy-foreground", pressedInForcedColors)
+        ? cn(
+            "bg-navy font-bold text-navy-foreground data-pressed:bg-navy data-pressed:text-navy-foreground data-pressed:hover:bg-navy",
+            pressedInForcedColors,
+          )
         : "font-semibold text-muted-strong hover:bg-card",
     );
 
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
+    <Field className="min-w-0 gap-1.5">
       <span id={labelId} className={fieldLabel}>
         Period
       </span>
-      <div
-        role="group"
+      <ToggleGroup
+        value={[filters.period]}
+        onValueChange={(values) => {
+          const period = values[0];
+          if (!period) return;
+          const preset = presets.find((item) => item.value === period);
+          if (preset) onChange({ period: preset.value, range: undefined });
+        }}
         aria-labelledby={labelId}
-        className="grid grid-cols-5 gap-0.5 rounded-[12px] bg-background p-0.75"
+        className="grid h-11 w-full grid-cols-5 gap-0.5 rounded-[12px] bg-background p-0.75"
       >
         {presets.map((preset) => (
-          <button
+          <ToggleGroupItem
             key={preset.value}
             type="button"
-            aria-pressed={filters.period === preset.value}
-            onClick={() => onChange({ period: preset.value, range: undefined })}
+            value={preset.value}
             className={segment(filters.period === preset.value)}
           >
             {/* The short label starts the accessible name, so voice control can use it. */}
             <span>{preset.value}</span>
             <span className="sr-only">, {preset.label}</span>
-          </button>
+          </ToggleGroupItem>
         ))}
-        <button
-          type="button"
-          aria-pressed={filters.period === "custom"}
-          aria-label="Custom range"
-          onClick={() =>
-            onChange({
-              period: "custom",
-              range: filtersRange(filters, today),
-            })
+        <TransactionDateRange
+          range={filtersRange(filters, today)}
+          today={today}
+          onApply={(range) => onChange({ period: "custom", range })}
+          trigger={
+            <ToggleGroupItem
+              type="button"
+              value="custom"
+              aria-label="Custom range"
+              className={segment(filters.period === "custom")}
+            >
+              <CalendarDays aria-hidden className="size-4" />
+            </ToggleGroupItem>
           }
-          className={segment(filters.period === "custom")}
-        >
-          <CalendarDays aria-hidden className="size-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function CustomRange({
-  range,
-  today,
-  onChange,
-}: {
-  range: { start: DayKey; end: DayKey };
-  today: DayKey;
-  onChange: FiltersChange;
-}) {
-  const [draft, setDraft] = useState(range);
-  const [applied, setApplied] = useState(range);
-  if (range.start !== applied.start || range.end !== applied.end) {
-    setApplied(range);
-    setDraft(range);
-  }
-
-  const problem = (range: { start: DayKey; end: DayKey }) =>
-    !range.start || !range.end
-      ? "Choose both dates."
-      : range.start < EARLIEST_DAY || range.end > today
-        ? `Choose dates from ${formatDay(EARLIEST_DAY)} to today.`
-        : range.start > range.end
-          ? "Choose a start date on or before the end date."
-          : undefined;
-  const error = problem(draft);
-
-  // Typing a year passes through dates like 0002-09-01; only real ones apply.
-  function update(next: { start: DayKey; end: DayKey }) {
-    setDraft(next);
-    if (!problem(next)) onChange({ range: next }, { replace: true });
-  }
-
-  return (
-    <fieldset className="flex min-w-0 flex-col gap-2">
-      <legend className="sr-only">Custom range</legend>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor="range-start" className={fieldLabel}>
-            From
-          </label>
-          <input
-            id="range-start"
-            type="date"
-            value={draft.start}
-            min={EARLIEST_DAY}
-            max={today}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? "range-error" : undefined}
-            onChange={(event) =>
-              update({ ...draft, start: event.target.value })
-            }
-            className={cn(control, "w-full min-w-0 px-2 tabular-nums")}
-          />
-        </div>
-        <div className="flex min-w-0 flex-col gap-1.5">
-          <label htmlFor="range-end" className={fieldLabel}>
-            To
-          </label>
-          <input
-            id="range-end"
-            type="date"
-            value={draft.end}
-            min={EARLIEST_DAY}
-            max={today}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? "range-error" : undefined}
-            onChange={(event) => update({ ...draft, end: event.target.value })}
-            className={cn(control, "w-full min-w-0 px-2 tabular-nums")}
-          />
-        </div>
-      </div>
-      {error && (
-        <p
-          id="range-error"
-          role="alert"
-          className="text-sm font-semibold text-destructive"
-        >
-          {error}
-        </p>
-      )}
-    </fieldset>
+        />
+      </ToggleGroup>
+    </Field>
   );
 }
 
@@ -312,22 +232,16 @@ function SortField({
   onChange: FiltersChange;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <label htmlFor="transaction-sort" className={fieldLabel}>
-        Sort by
-      </label>
-      <NativeSelect
-        id="transaction-sort"
-        value={value}
-        onChange={(event) => onChange({ sortBy: event.target.value as SortBy })}
-      >
-        {SORT_OPTIONS.map((option) => (
-          <option key={option} value={option}>
-            {SORT_LABELS[option]}
-          </option>
-        ))}
-      </NativeSelect>
-    </div>
+    <SelectField
+      id="transaction-sort"
+      label="Sort by"
+      value={value}
+      items={SORT_OPTIONS.map((option) => ({
+        value: option,
+        label: SORT_LABELS[option],
+      }))}
+      onValueChange={(sortBy) => onChange({ sortBy: sortBy as SortBy })}
+    />
   );
 }
 
@@ -341,28 +255,19 @@ function CategoryFilter({
   onChange: FiltersChange;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1.5">
-      <label htmlFor="transaction-category" className={fieldLabel}>
-        Category
-      </label>
-      <NativeSelect
-        id="transaction-category"
-        value={selected ?? ""}
-        onChange={(event) =>
-          onChange({
-            category:
-              (event.target.value as TransactionFilters["category"]) ||
-              undefined,
-          })
-        }
-      >
-        <option value="">All categories</option>
-        {categories.map((category) => (
-          <option key={category.name} value={category.name}>
-            {category.name}
-          </option>
-        ))}
-      </NativeSelect>
-    </div>
+    <SelectField
+      id="transaction-category"
+      label="Category"
+      value={selected ?? ""}
+      items={[
+        { value: "", label: "All categories" },
+        ...categories.map(({ name }) => ({ value: name, label: name })),
+      ]}
+      onValueChange={(category) =>
+        onChange({
+          category: (category as TransactionFilters["category"]) || undefined,
+        })
+      }
+    />
   );
 }

@@ -58,7 +58,7 @@ components/
   ui/                           shadcn/ui primitives
   layout/                       App shell: sidebar, bottom nav, page header
 lib/                            Cross-cutting helpers: env, logging, formatting
-test-utils/                     Shared test fixtures, providers and browser mocks
+test-utils/                     Shared test fixtures, providers and text helpers
 e2e/                            Playwright tests
 ```
 
@@ -73,3 +73,11 @@ cross-feature URL, date, period and validation helpers in `lib/`. Reuse those
 modules before adding another local helper. Shared test setup belongs in
 `test-utils/`; individual tests keep their scenario-specific values and expected
 results explicit. Test helpers are excluded from application coverage.
+
+Use the shadcn components in `components/ui/` for standard UI controls and
+surfaces. Keep application-specific composition, such as `SectionCard`,
+`SelectField` and `EmptyState`, in `components/`. Style navigation
+links with `buttonVariants` to retain native link semantics. The transaction range picker
+uses a two-month popover on desktop and bottom sheet on mobile, with month/year
+selectors and changes applied only after confirmation; goal progress retains its pace
+marker and announces the actual percentage when spending exceeds the budget.
