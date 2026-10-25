@@ -18,10 +18,7 @@ test.describe("goals", () => {
     }
   });
 
-  test("opens this month's purchases for a goal", async ({
-    page,
-    isMobile,
-  }) => {
+  test("opens this month's purchases for a goal", async ({ page }) => {
     await page.goto("/goals");
     // Groceries is a card when it needs attention and a list row otherwise.
     await page
@@ -31,6 +28,6 @@ test.describe("goals", () => {
     await expect(page).toHaveURL(
       /\/transactions\?category=Groceries&period=custom&from=\d{4}-\d{2}-01&to=/,
     );
-    await expectCategorySelected(page, "Groceries", isMobile);
+    await expectCategorySelected(page, "Groceries");
   });
 });

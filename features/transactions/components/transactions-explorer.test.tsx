@@ -156,11 +156,14 @@ describe("TransactionsExplorer", () => {
   it("puts a chosen category in the URL", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("");
-    await userEvent.click(screen.getByRole("button", { name: "Groceries" }));
+    await userEvent.selectOptions(
+      screen.getByRole("combobox", { name: "Category" }),
+      "Groceries",
+    );
     expect(pushState).toHaveBeenCalledWith(null, "", "?category=Groceries");
   });
 
-  it("selects any category from the mobile control and returns to page one", async () => {
+  it("selects any category and returns to page one", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("page=3");
     await userEvent.selectOptions(
@@ -170,7 +173,7 @@ describe("TransactionsExplorer", () => {
     expect(pushState).toHaveBeenCalledWith(null, "", "?category=Utilities");
   });
 
-  it("clears the mobile category selection while keeping other filters", async () => {
+  it("clears the category selection while keeping other filters", async () => {
     const pushState = vi.spyOn(window.history, "pushState");
     renderExplorer("category=Groceries&q=pick");
     const category = screen.getByRole("combobox", { name: "Category" });

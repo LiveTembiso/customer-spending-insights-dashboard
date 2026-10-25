@@ -25,16 +25,16 @@ for (const width of [360, 768]) {
   });
 }
 
-test("opens a category's purchases from the overview", async ({ page }) => {
+test("opens spending insights from the overview", async ({ page }) => {
   await page.goto("/");
   await page
     .getByRole("region", { name: "Where it went" })
-    .getByRole("link", { name: /^Groceries / })
+    .getByRole("link", { name: "View details of spending by category" })
     .click();
 
-  await expect(page).toHaveURL(/category=Groceries&period=custom&from=/);
+  await expect(page).toHaveURL(/\/insights$/);
   await expect(
-    page.getByRole("heading", { level: 2, name: "Groceries" }),
+    page.getByRole("heading", { level: 1, name: "Insights" }),
   ).toBeVisible();
 });
 

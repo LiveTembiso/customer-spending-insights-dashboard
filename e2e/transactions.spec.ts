@@ -11,20 +11,11 @@ const visibleRowButtons = (page: Page) =>
     .filter({ visible: true });
 
 test.describe("transactions", () => {
-  test("filters by category and keeps it in the link", async ({
-    page,
-    isMobile,
-  }) => {
+  test("filters by category and keeps it in the link", async ({ page }) => {
     await page.goto("/transactions");
-    if (isMobile) {
-      await page
-        .getByRole("combobox", { name: "Category" })
-        .selectOption("Groceries");
-    } else {
-      await page
-        .getByRole("button", { name: "Groceries", exact: true })
-        .click();
-    }
+    await page
+      .getByRole("combobox", { name: "Category" })
+      .selectOption("Groceries");
 
     await expect(page).toHaveURL(/category=Groceries/);
     await expect(
@@ -32,7 +23,7 @@ test.describe("transactions", () => {
     ).toBeVisible();
 
     await page.reload();
-    await expectCategorySelected(page, "Groceries", isMobile);
+    await expectCategorySelected(page, "Groceries");
   });
 
   test("changes the period", async ({ page }) => {
@@ -70,6 +61,44 @@ test.describe("transactions", () => {
 test.describe("transactions on a wide screen", () => {
   test.skip(({ isMobile }) => isMobile, "desktop layout only");
   test.use({ viewport: { width: 1440, height: 900 } });
+
+  for (const width of [1366, 1920]) {
+    test(`keeps search on its own row at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/transactions");
+
+      await expect(async () => {
+        const panel = page.getByRole("region", {
+          name: "Filters",
+          exact: true,
+        });
+        const search = await panel.getByRole("searchbox").boundingBox();
+        const period = await panel
+          .getByRole("group", { name: "Period" })
+          .boundingBox();
+        const category = await panel
+          .getByRole("combobox", { name: "Category" })
+          .boundingBox();
+        const sort = await panel
+          .getByRole("combobox", { name: "Sort by" })
+          .boundingBox();
+
+        expect(search).not.toBeNull();
+        expect(period).not.toBeNull();
+        expect(category).not.toBeNull();
+        expect(sort).not.toBeNull();
+        expect(search!.y + search!.height).toBeLessThan(period!.y);
+        expect(Math.abs(period!.y - category!.y)).toBeLessThan(1);
+        expect(Math.abs(category!.y - sort!.y)).toBeLessThan(1);
+        expect(Math.abs(search!.x - period!.x)).toBeLessThan(1);
+        expect(period!.x + period!.width).toBeLessThan(category!.x);
+        expect(category!.x + category!.width).toBeLessThan(sort!.x);
+        expect(
+          Math.abs(search!.x + search!.width - sort!.x - sort!.width),
+        ).toBeLessThan(1);
+      }).toPass();
+    });
+  }
 
   test("shows details beside the list and returns focus on Escape", async ({
     page,
