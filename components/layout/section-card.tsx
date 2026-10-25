@@ -44,7 +44,12 @@ export function SectionCard({
             className="-my-2.5 py-3 text-sm font-bold text-primary hover:text-primary-hover"
           >
             {link.label}
-            {link.context && <span className="sr-only"> {link.context}</span>}
+            {link.context && (
+              <>
+                {" "}
+                <span className="sr-only">{link.context}</span>
+              </>
+            )}
           </Link>
         )}
       </div>
