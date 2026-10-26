@@ -134,13 +134,8 @@ export function MonthTableCard({
 
         <div className="hidden lg:block">
           <Table
-            containerProps={{
-              role: "region",
-              "aria-label": "Month by month table, scrollable",
-              tabIndex: 0,
-            }}
             aria-labelledby="month-table-title"
-            className="w-full min-w-[620px] border-collapse text-sm"
+            className="w-full border-collapse text-sm"
           >
             <TableHeader>
               <TableRow className="bg-muted text-left text-[13px] text-muted-foreground">

@@ -11,15 +11,11 @@ import { SectionCard } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CategoryDot } from "@/features/categories/components/category-dot";
 import { formatRands } from "@/lib/format";
-import { roundTo } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
 import { purchases } from "../labels";
 import type { CategoriesResponse } from "../schemas";
 import { CategoryDonut, DonutTotal } from "./category-donut";
-
-const averageOf = (amount: number, count: number) =>
-  count === 0 ? 0 : roundTo(amount / count, 2);
 
 interface CategorySpendCardProps {
   description: string;
@@ -91,10 +87,7 @@ export function CategorySpendCard({
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="font-bold">{category.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {purchases(category.transactionCount)} · avg{" "}
-                    {formatRands(
-                      averageOf(category.amount, category.transactionCount),
-                    )}
+                    {purchases(category.transactionCount)}
                   </span>
                 </span>
                 <span className="flex flex-col items-end gap-0.5">
@@ -131,12 +124,6 @@ export function CategorySpendCard({
                   >
                     Purchases
                   </TableHead>
-                  <TableHead
-                    scope="col"
-                    className="pb-2 pl-2 text-right font-semibold"
-                  >
-                    Average
-                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="tabular-nums">
@@ -162,11 +149,6 @@ export function CategorySpendCard({
                     </TableCell>
                     <TableCell className="px-2 py-2.5 text-right">
                       {category.transactionCount}
-                    </TableCell>
-                    <TableCell className="py-2.5 pl-2 text-right text-muted-strong">
-                      {formatRands(
-                        averageOf(category.amount, category.transactionCount),
-                      )}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -173,31 +173,31 @@ function TransactionTable({
     <div className="hidden lg:block">
       <Table
         aria-labelledby={LIST_TITLE_ID}
-        className="w-full min-w-[46rem] border-collapse text-sm"
+        className="w-full border-collapse text-sm"
       >
         <TableHeader>
           <TableRow className="bg-muted text-left text-[13px] text-muted-foreground">
             <TableHead
               scope="col"
-              className="rounded-l-lg px-3 py-2.5 font-semibold"
+              className="rounded-l-lg px-2 py-2.5 font-semibold"
             >
               Date
             </TableHead>
-            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
+            <TableHead scope="col" className="px-2 py-2.5 font-semibold">
               Merchant
             </TableHead>
-            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
+            <TableHead scope="col" className="px-2 py-2.5 font-semibold">
               Category
             </TableHead>
-            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
+            <TableHead scope="col" className="px-2 py-2.5 font-semibold">
               Description
             </TableHead>
-            <TableHead scope="col" className="px-3 py-2.5 font-semibold">
+            <TableHead scope="col" className="px-2 py-2.5 font-semibold">
               Paid with
             </TableHead>
             <TableHead
               scope="col"
-              className="rounded-r-lg px-3 py-2.5 text-right font-semibold"
+              className="rounded-r-lg px-2 py-2.5 text-right font-semibold"
             >
               Amount
             </TableHead>
@@ -218,7 +218,7 @@ function TransactionTable({
               >
                 <TableCell
                   className={cn(
-                    "px-3 py-2 whitespace-nowrap",
+                    "px-2 py-2 whitespace-nowrap",
                     selected &&
                       "shadow-[inset_3px_0_0_var(--primary)] forced-colors:border-l-4 forced-colors:border-l-[Highlight]",
                   )}
@@ -232,7 +232,7 @@ function TransactionTable({
                     </span>
                   </span>
                 </TableCell>
-                <TableCell className="px-3 py-2">
+                <TableCell className="px-2 py-2">
                   <Button
                     variant="ghost"
                     id={rowButtonId(transaction.id, "table")}
@@ -243,25 +243,25 @@ function TransactionTable({
                     }
                     aria-haspopup={detailsBeside ? undefined : "dialog"}
                     onClick={() => onSelect(transaction)}
-                    className="inline-flex min-h-11 items-center gap-2.5 rounded-[8px] text-left font-bold hover:text-primary"
+                    className="inline-flex h-auto min-h-11 items-center gap-2.5 rounded-[8px] text-left font-bold whitespace-normal hover:text-primary"
                   >
                     <MerchantAvatar transaction={transaction} />
                     {transaction.merchant}
                   </Button>
                 </TableCell>
-                <TableCell className="px-3 py-2">
+                <TableCell className="px-2 py-2">
                   <CategoryPill
                     transaction={transaction}
                     className={cn(selected && "bg-card")}
                   />
                 </TableCell>
-                <TableCell className="px-3 py-2 text-muted-strong">
+                <TableCell className="px-2 py-2 text-muted-strong">
                   {transaction.description}
                 </TableCell>
-                <TableCell className="px-3 py-2 whitespace-nowrap text-muted-strong">
+                <TableCell className="px-2 py-2 text-muted-strong">
                   {transaction.paymentMethod}
                 </TableCell>
-                <TableCell className="px-3 py-2 text-right font-bold whitespace-nowrap">
+                <TableCell className="px-2 py-2 text-right font-bold whitespace-nowrap">
                   {debit(transaction.amount)}
                 </TableCell>
               </TableRow>

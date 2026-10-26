@@ -202,7 +202,7 @@ describe("InsightsExplorer", () => {
     );
   });
 
-  it("lists only categories with spending, with their averages", () => {
+  it("lists only categories with spending and their purchase counts", () => {
     renderExplorer();
     const table = screen.getByRole("table", { name: "Category breakdown" });
     const rows = within(table).getAllByRole("row").slice(1);
@@ -210,7 +210,12 @@ describe("InsightsExplorer", () => {
       "Groceries",
       "Utilities",
     ]);
-    expect(text(rows[1])).toContain("R152.90");
+    expect(within(table).getAllByRole("columnheader").map(text)).toEqual([
+      "Category",
+      "Spent",
+      "Purchases",
+    ]);
+    expect(text(rows[1])).toBe("UtilitiesR458.70 (26.8% of spending)3");
   });
 
   it("points out what stands out, with the goal for the top category", () => {
