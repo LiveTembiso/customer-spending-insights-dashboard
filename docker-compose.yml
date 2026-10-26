@@ -1,0 +1,14 @@
+services:
+  web:
+    image: customer-spending-insights-dashboard:local
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_DEFAULT_CUSTOMER_ID: ${NEXT_PUBLIC_DEFAULT_CUSTOMER_ID:-12345}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      MOCK_DATA_SEED: ${MOCK_DATA_SEED:-20240916}
+      MOCK_API_LATENCY_MS: ${MOCK_API_LATENCY_MS:-0}
+    init: true

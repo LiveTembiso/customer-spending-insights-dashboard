@@ -14,6 +14,33 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Docker
+
+With Docker and Compose installed, run from a fresh clone:
+
+```bash
+docker compose up --build --wait
+```
+
+Open [http://localhost:3000](http://localhost:3000). If that port is already in use,
+run `APP_PORT=3001 docker compose up --build --wait` and open port 3001 instead.
+Stop the container with `docker compose down`.
+
+The multi-stage Node 22 Alpine build installs locked dependencies with `npm ci`
+and copies Next.js standalone output, static assets and public files into a
+runtime image running as a non-root user. The image checks `/api/health`;
+`/api/ready` also checks that the mock data source can serve the default customer.
+Local environment files, dependencies and test output are excluded from the build
+context.
+
+Compose accepts the variables in `.env.example` from the shell or an optional
+`.env` file. `NEXT_PUBLIC_DEFAULT_CUSTOMER_ID` is a build argument: rebuild the
+image after changing it. `LOG_LEVEL`, `MOCK_DATA_SEED` and `MOCK_API_LATENCY_MS`
+are runtime settings. `APP_PORT` controls the host port and defaults to 3000.
+
+CI builds and scans the container for high/critical vulnerabilities, waits for
+its health check, and runs Playwright against that production container.
+
 ## API
 
 The mock API follows the assessment contract under `/api/customers/{customerId}/`. With the dev server running:
