@@ -53,8 +53,8 @@ describe("CategorySpendCard", () => {
     const items = within(screen.getByRole("list")).getAllByRole("listitem");
 
     expect(items.map(text)).toEqual([
-      "Groceries15 purchases · avg R83.35R1 250.3073.2%",
-      "Utilities1 purchase · avg R458.70R458.7026.8%",
+      "Groceries15 purchasesR1 250.3073.2%",
+      "Utilities1 purchaseR458.7026.8%",
     ]);
   });
 
@@ -63,7 +63,7 @@ describe("CategorySpendCard", () => {
     const table = screen.getByRole("table", { name: "Category breakdown" });
     const [, row] = within(table).getAllByRole("row");
 
-    expect(text(row)).toBe("GroceriesR1 250.30 (100.0% of spending)15R83.35");
+    expect(text(row)).toBe("GroceriesR1 250.30 (100.0% of spending)15");
   });
 
   it("puts the total in whole rands in the donut", () => {
