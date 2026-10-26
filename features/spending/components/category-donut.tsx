@@ -75,7 +75,10 @@ const DonutRing = memo(function DonutRing({
       initialDimension={{ width: size, height: size }}
       className="aspect-square size-full"
     >
-      <PieChart accessibilityLayer={false}>
+      <PieChart
+        accessibilityLayer={false}
+        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+      >
         <Pie
           data={data}
           dataKey="amount"
@@ -141,7 +144,8 @@ export function CategoryDonut({
         "relative shrink-0 rounded-full [&_svg]:forced-color-adjust-none",
         className,
       )}
-      onMouseMove={(event) => {
+      // Pointer events preserve fractional coordinates at the inner edge.
+      onPointerMove={(event) => {
         const box = root.current?.getBoundingClientRect();
         if (!box) return;
         const x = event.clientX - box.left;
@@ -149,7 +153,6 @@ export function CategoryDonut({
         lastPointer.current = { x, y };
         if (!shown) return;
         const radius = box.width / 2;
-        // Off the ring (the hole or the corners) closes it; a gap between slices doesn't.
         const fromCentre = Math.hypot(x - radius, y - radius) / radius;
         if (fromCentre < 0.66 || fromCentre > 1) setActive(undefined);
         else setPointer({ x, y });
@@ -165,9 +168,9 @@ export function CategoryDonut({
       <span className="@container pointer-events-none absolute inset-[17%] flex flex-col items-center justify-center gap-0.5 rounded-full">
         {children}
       </span>
-      {/* Ours rather than Recharts', so it stays up while the pointer crosses a gap. */}
       {shown && (
         <span
+          role="tooltip"
           className="pointer-events-none absolute z-10 flex min-w-36 items-center gap-2 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs whitespace-nowrap shadow-xl"
           style={{
             left: pointer.x + 12,

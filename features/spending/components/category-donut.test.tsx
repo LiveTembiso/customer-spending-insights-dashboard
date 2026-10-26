@@ -50,7 +50,7 @@ describe("CategoryDonut", () => {
 
   it("shows the hovered slice and dims the others", () => {
     const { container, root, sector } = renderDonut();
-    fireEvent.mouseMove(root, { clientX: 170, clientY: 90 });
+    fireEvent.pointerMove(root, { clientX: 170, clientY: 90 });
     fireEvent.mouseEnter(sector(0));
 
     const parts = [...tooltip(container)!.querySelectorAll("span")].map(text);
@@ -68,15 +68,25 @@ describe("CategoryDonut", () => {
   it("follows the pointer around the ring", () => {
     const { container, root, sector } = renderDonut();
     fireEvent.mouseEnter(sector(0));
-    fireEvent.mouseMove(root, { clientX: 10, clientY: 90 });
+    fireEvent.pointerMove(root, { clientX: 10, clientY: 90 });
 
     expect(tooltip(container)).toHaveStyle({ left: "22px", top: "102px" });
+  });
+
+  it("keeps the tooltip at the inner edge with fractional pointer coordinates", () => {
+    const { container, root, sector } = renderDonut();
+    fireEvent.mouseEnter(sector(0));
+    // Rounding these coordinates puts the pointer inside the hole.
+    fireEvent.pointerMove(root, { clientX: 134.8, clientY: 129.4 });
+
+    expect(tooltip(container)).not.toBeNull();
+    expect(tooltip(container)).toHaveStyle({ left: "146.8px", top: "141.4px" });
   });
 
   it("closes over the hole and when the pointer leaves", () => {
     const { container, root, sector } = renderDonut();
     fireEvent.mouseEnter(sector(0));
-    fireEvent.mouseMove(root, { clientX: 90, clientY: 90 });
+    fireEvent.pointerMove(root, { clientX: 90, clientY: 90 });
     expect(tooltip(container)).toBeNull();
 
     fireEvent.mouseEnter(sector(1));
