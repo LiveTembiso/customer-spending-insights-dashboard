@@ -243,7 +243,7 @@ function TransactionTable({
                     }
                     aria-haspopup={detailsBeside ? undefined : "dialog"}
                     onClick={() => onSelect(transaction)}
-                    className="inline-flex h-auto min-h-11 items-center gap-2.5 rounded-[8px] text-left font-bold whitespace-normal hover:text-primary"
+                    className="inline-flex h-auto min-h-11 items-center gap-2.5 rounded-[8px] px-0 text-left font-bold [overflow-wrap:anywhere] whitespace-normal hover:text-primary"
                   >
                     <MerchantAvatar transaction={transaction} />
                     {transaction.merchant}
@@ -255,7 +255,7 @@ function TransactionTable({
                     className={cn(selected && "bg-card")}
                   />
                 </TableCell>
-                <TableCell className="px-2 py-2 text-muted-strong">
+                <TableCell className="px-2 py-2 [overflow-wrap:anywhere] text-muted-strong">
                   {transaction.description}
                 </TableCell>
                 <TableCell className="px-2 py-2 text-muted-strong">

@@ -67,7 +67,12 @@ test.describe("table headers", () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1024, height: 800 });
-    for (const path of ["/", "/transactions", "/insights"]) {
+    for (const path of [
+      "/",
+      "/transactions",
+      "/transactions?period=1y&sort=amount_desc",
+      "/insights",
+    ]) {
       await page.goto(path);
       await expect(page.getByRole("table").first()).toBeVisible();
       await expect(async () => {
@@ -86,6 +91,12 @@ test.describe("table headers", () => {
           expect(fitsCard, `${path} table should fit inside its card`).toBe(
             true,
           );
+          const cellsFit = await table.evaluate((element) =>
+            [...element.querySelectorAll("th,td")].every(
+              (cell) => cell.scrollWidth <= cell.clientWidth + 1,
+            ),
+          );
+          expect(cellsFit, `${path} cells should not overflow`).toBe(true);
         }
       }).toPass();
     }
