@@ -44,6 +44,7 @@ export function TransactionDateRange({
 }: TransactionDateRangeProps) {
   const mobile = useMediaQuery("(max-width: 767px)");
   const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(range);
   const Root = mobile ? Sheet : Popover;
   const Trigger = mobile ? SheetTrigger : PopoverTrigger;
   const Content = mobile ? SheetContent : PopoverContent;
@@ -51,7 +52,13 @@ export function TransactionDateRange({
   const Description = mobile ? SheetDescription : PopoverDescription;
 
   return (
-    <Root open={open} onOpenChange={setOpen}>
+    <Root
+      open={open}
+      onOpenChange={(next) => {
+        if (next) setDraft(range);
+        setOpen(next);
+      }}
+    >
       <Trigger render={trigger} />
       <Content
         {...(mobile
@@ -81,7 +88,8 @@ export function TransactionDateRange({
         </div>
         {open && (
           <RangeEditor
-            range={range}
+            range={draft}
+            onChange={setDraft}
             today={today}
             onCancel={() => setOpen(false)}
             onApply={(next) => {
@@ -96,12 +104,15 @@ export function TransactionDateRange({
 }
 
 function RangeEditor({
-  range,
+  range: draft,
   today,
+  onChange,
   onApply,
   onCancel,
-}: Omit<TransactionDateRangeProps, "trigger"> & { onCancel: () => void }) {
-  const [draft, setDraft] = useState(range);
+}: Omit<TransactionDateRangeProps, "trigger"> & {
+  onChange: (range: DayRange) => void;
+  onCancel: () => void;
+}) {
   const start = startOfDay(draft.start);
   const end = draft.end ? startOfDay(draft.end) : undefined;
 
@@ -125,7 +136,7 @@ function RangeEditor({
             from: start,
             to: end,
           }}
-          defaultMonth={startOfDay(range.start)}
+          defaultMonth={startOfDay(draft.start)}
           startMonth={startOfDay(EARLIEST_DAY)}
           endMonth={startOfDay(today)}
           disabled={[
@@ -135,7 +146,7 @@ function RangeEditor({
           onDayClick={(day) => {
             const chosen = toDayKey(day);
             // A completed range starts afresh; the next click supplies its end.
-            setDraft(
+            onChange(
               !draft.end
                 ? {
                     start: chosen < draft.start ? chosen : draft.start,

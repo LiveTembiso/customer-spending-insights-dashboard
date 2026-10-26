@@ -33,6 +33,18 @@ async function setup() {
 afterEach(() => vi.restoreAllMocks());
 
 describe("TransactionDateRange", () => {
+  it("moves day focus with arrow keys and selects the focused date", async () => {
+    await setup();
+    const day = screen.getByRole("button", { name: /September 22/ });
+    day.focus();
+    await userEvent.keyboard("{ArrowRight}");
+    expect(screen.getByRole("button", { name: /September 23/ })).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    expect(selectedRange()).toHaveTextContent(
+      "23 Sep 2026 – Choose an end date.",
+    );
+  });
+
   it("jumps by month and year in either calendar without changing dates until selected", async () => {
     const { onApply } = await setup();
     await selectOption("Choose the Year", "2020");

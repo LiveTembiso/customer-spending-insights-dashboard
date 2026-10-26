@@ -226,6 +226,62 @@ test.describe("transactions", () => {
     }
   });
 
+  test("selects custom dates with calendar arrow keys", async ({ page }) => {
+    await page.goto(
+      "/transactions?period=custom&from=2026-09-21&to=2026-10-20",
+    );
+    await page
+      .getByRole("button", { name: "Custom range", exact: true })
+      .click();
+    const picker = page.getByRole("dialog", { name: "Custom date range" });
+    await picker.getByRole("button", { name: /September 22/ }).focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(
+      picker.getByRole("button", { name: /September 23/ }),
+    ).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(
+      picker.getByRole("status", { name: "Selected date range" }),
+    ).toHaveText("23 Sep 2026 – Choose an end date.");
+    await page.keyboard.press("ArrowDown");
+    await expect(
+      picker.getByRole("button", { name: /September 30/ }),
+    ).toBeFocused();
+    await page.keyboard.press("Enter");
+    await picker.getByRole("button", { name: "Apply range" }).click();
+    await expect(page).toHaveURL(/from=2026-09-23&to=2026-09-30/);
+  });
+
+  test("preserves draft dates when switching between popover and sheet", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1366, height: 900 });
+    await page.goto(
+      "/transactions?period=custom&from=2026-09-21&to=2026-10-20",
+    );
+    await page
+      .getByRole("button", { name: "Custom range", exact: true })
+      .click();
+    const picker = page.getByRole("dialog", { name: "Custom date range" });
+    await picker.getByRole("button", { name: /September 22/ }).click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(picker).toHaveAttribute("data-slot", "sheet-content");
+    await expect(
+      picker.getByRole("status", { name: "Selected date range" }),
+    ).toHaveText("22 Sep 2026 – Choose an end date.");
+    await expect(
+      picker.getByRole("button", { name: "Apply range" }),
+    ).toBeDisabled();
+    await picker.getByRole("button", { name: /October 12/ }).click();
+    await page.setViewportSize({ width: 1366, height: 900 });
+    await expect(picker).toHaveAttribute("data-slot", "popover-content");
+    await expect(
+      picker.getByRole("status", { name: "Selected date range" }),
+    ).toHaveText("22 Sep 2026 – 12 Oct 2026");
+    await picker.getByRole("button", { name: "Apply range" }).click();
+    await expect(page).toHaveURL(/from=2026-09-22&to=2026-10-12/);
+  });
+
   test("moves between periods with the keyboard", async ({ page }) => {
     await page.goto("/transactions?period=7d");
     const week = page.getByRole("button", { name: /Last 7 days/ });
