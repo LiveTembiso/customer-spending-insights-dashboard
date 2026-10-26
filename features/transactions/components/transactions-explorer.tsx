@@ -25,7 +25,6 @@ import {
   toTransactionsQuery,
 } from "../filters";
 import type { Transaction } from "../schemas";
-import { ExportButton } from "./export-button";
 import {
   goalFor,
   TransactionDetailsDialog,
@@ -131,18 +130,7 @@ export function TransactionsExplorer({
 
   return (
     <>
-      <PageHeader
-        eyebrow="Search, filter and sort"
-        title="Transactions"
-        actions={
-          <ExportButton
-            customerId={customerId}
-            query={apiQuery}
-            range={range}
-            disabled={!total || transactions.isPlaceholderData}
-          />
-        }
-      />
+      <PageHeader eyebrow="Search, filter and sort" title="Transactions" />
       <div
         className={cn(
           "grid gap-4",

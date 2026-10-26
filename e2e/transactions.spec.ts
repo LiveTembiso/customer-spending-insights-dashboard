@@ -1,5 +1,3 @@
-import { readFile } from "node:fs/promises";
-
 import { expect, type Page, test } from "@playwright/test";
 
 import { selectOption } from "./helpers/select";
@@ -314,22 +312,5 @@ test.describe("transactions on a wide screen", () => {
     await page.keyboard.press("Escape");
     await expect(details).toBeHidden();
     await expect(row).toBeFocused();
-  });
-
-  test("exports the filtered transactions as CSV", async ({ page }) => {
-    await page.goto("/transactions?category=Groceries");
-    const download = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Export CSV" }).click();
-
-    const file = await download;
-    expect(file.suggestedFilename()).toMatch(
-      /^transactions-\d{4}-\d{2}-\d{2}-to-\d{4}-\d{2}-\d{2}\.csv$/,
-    );
-    const text = await readFile(await file.path(), "utf8");
-    const lines = text.trim().split("\r\n");
-    expect(lines[0]).toContain("Date,Time,Merchant");
-    expect(lines.slice(1).every((line) => line.includes(",Groceries,"))).toBe(
-      true,
-    );
   });
 });
