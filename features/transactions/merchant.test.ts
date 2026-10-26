@@ -3,6 +3,13 @@ import { describe, expect, it } from "vitest";
 import { merchantInitials } from "./merchant";
 
 describe("merchantInitials", () => {
+  it.each(["", "   ", "\t\n"])(
+    "returns no initials for a blank merchant (%j)",
+    (merchant) => {
+      expect(merchantInitials(merchant)).toBe("");
+    },
+  );
+
   it("takes the first and last word of a longer name", () => {
     expect(merchantInitials("Pick n Pay")).toBe("PP");
   });

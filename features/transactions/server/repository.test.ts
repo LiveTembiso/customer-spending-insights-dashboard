@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   type TransactionsQuery,
@@ -6,6 +6,8 @@ import {
   transactionsResponseSchema,
 } from "../schemas";
 import { listTransactions } from "./repository";
+import * as store from "./store";
+import type { TransactionRecord } from "./generate";
 
 const NOW = new Date("2026-10-14T06:00:00Z");
 
@@ -85,6 +87,46 @@ describe("listTransactions", () => {
 
     expect(amounts).toEqual([...amounts].sort((a, b) => b - a));
   });
+
+  it("sorts oldest first when requested", () => {
+    const dates = list({ sortBy: "date_asc", limit: 50 }).transactions.map(
+      (t) => t.date,
+    );
+    expect(dates).toHaveLength(50);
+    expect(dates).toEqual([...dates].sort());
+  });
+
+  it.each(["amount_asc", "amount_desc"] as const)(
+    "uses newest-first tie breaking for equal amounts with %s",
+    (sortBy) => {
+      const record = (
+        id: string,
+        date: string,
+        amount: number,
+      ): TransactionRecord => ({
+        id: `txn_${id}`,
+        timestamp: Date.parse(date),
+        day: date.slice(0, 10),
+        amount,
+        merchant: "Test shop",
+        category: "Groceries",
+        description: "Groceries",
+        paymentMethod: "Debit Card",
+      });
+      vi.spyOn(store, "getCustomerTransactions").mockReturnValue([
+        record("older", "2026-10-10T06:00:00Z", 10000),
+        record("smallest", "2026-10-12T06:00:00Z", 100),
+        record("newer", "2026-10-11T06:00:00Z", 10000),
+        record("largest", "2026-10-13T06:00:00Z", 20000),
+      ]);
+      const ids = list({ sortBy }).transactions.map((t) => t.id);
+      expect(ids).toEqual(
+        sortBy === "amount_asc"
+          ? ["txn_smallest", "txn_newer", "txn_older", "txn_largest"]
+          : ["txn_largest", "txn_newer", "txn_older", "txn_smallest"],
+      );
+    },
+  );
 
   it("searches merchant and description, ignoring case", () => {
     const byMerchant = list({ q: "netflix", limit: 100 }).transactions;
