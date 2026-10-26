@@ -4,6 +4,12 @@ node_modules
 .env*
 .codex
 .agents
+.github
+.husky
+Dockerfile
+.dockerignore
+docker-compose.yml
+README.md
 coverage
 playwright-report
 test-results

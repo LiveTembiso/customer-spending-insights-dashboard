@@ -28,7 +28,8 @@ Stop the container with `docker compose down`.
 
 The multi-stage Node 22 Alpine build installs locked dependencies with `npm ci`
 and copies Next.js standalone output, static assets and public files into a
-runtime image running as a non-root user. The image checks `/api/health`;
+runtime image running as a non-root user, without npm, Yarn or Corepack.
+The image checks `/api/health`;
 `/api/ready` also checks that the mock data source can serve the default customer.
 Local environment files, dependencies and test output are excluded from the build
 context.

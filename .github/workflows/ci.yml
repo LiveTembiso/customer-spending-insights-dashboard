@@ -73,6 +73,13 @@ jobs:
           exit-code: "1"
       - name: Start the container and wait for health
         run: docker compose up --no-build --wait --wait-timeout 90
+      - name: Verify image size, runtime user and readiness
+        run: |
+          docker image inspect customer-spending-insights-dashboard:local --format 'Image size: {{.Size}} bytes; user: {{.Config.User}}'
+          runtime_uid=$(docker compose exec -T web id -u)
+          test "$runtime_uid" -ne 0
+          docker compose exec -T web sh -c '! command -v npm && ! command -v yarn && ! command -v corepack'
+          curl --fail --retry 5 --retry-delay 1 http://localhost:3000/api/ready
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
