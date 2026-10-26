@@ -157,6 +157,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  html,
+  body {
+    /* Keep the app within the viewport without creating a nested scroll area. */
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
+  }
   html {
     /* Keeps focused content clear of the fixed phone tab bar. */
     @apply scroll-pb-28 font-sans md:scroll-pb-0;
