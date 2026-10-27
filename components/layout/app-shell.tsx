@@ -8,9 +8,7 @@ import { TabBar } from "./tab-bar";
 
 interface AppShellProps {
   children: ReactNode;
-  /** Account details for the sidebar footer. */
   account: ReactNode;
-  /** Compact account control for the phone header. */
   accountCompact: ReactNode;
   badges?: NavBadges;
 }
