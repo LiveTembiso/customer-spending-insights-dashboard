@@ -34,7 +34,6 @@ const monthsSchema = z.coerce
   .number()
   .pipe(z.union(MONTH_CHOICES.map((months) => z.literal(months))));
 
-// Values that don't parse fall back to defaults, so an edited link still opens.
 export function parseView(source: ParamSource): InsightsView {
   return {
     period:

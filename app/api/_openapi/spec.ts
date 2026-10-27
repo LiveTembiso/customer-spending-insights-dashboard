@@ -92,9 +92,9 @@ export const ENDPOINTS: readonly Endpoint[] = [
     },
     query: transactionsQuerySchema,
     parameterNotes: {
-      startDate: "Inclusive. Days are counted in South African time (UTC+2).",
+      startDate: "Inclusive. Dates are in SAST.",
       endDate: "Inclusive. Must not be before `startDate`.",
-      q: "Case-insensitive search of merchant and description. An addition to the original contract.",
+      q: "Case-insensitive search of merchant and description.",
     },
   },
   {
@@ -112,7 +112,7 @@ export const ENDPOINTS: readonly Endpoint[] = [
     operationId: "getFilters",
     tag: "Filters",
     summary: "Filter options",
-    description: "Categories and date range presets for building filter UI.",
+    description: "Categories and date range presets.",
     response: { name: "FiltersResponse", schema: filtersResponseSchema },
   },
 ];
@@ -284,25 +284,24 @@ export function buildOpenApiSpec() {
       title: "Customer Spending Insights API",
       version: "1.0.0",
       description:
-        "Mock API serving a customer's spending data. Amounts are in ZAR, " +
-        "and days and months are counted in South African time (UTC+2). " +
-        "Customer endpoints send `X-Request-Id`; send your own to trace a request.",
+        "Mock API serving a customer's spending data. " +
+        "Customer endpoints return an `X-Request-Id` header.",
     },
     servers: [{ url: "/" }],
     // A mock API: requests aren't authenticated.
     security: [],
     tags: [
-      { name: "Profile", description: "Who the customer is." },
+      { name: "Profile", description: "Customer details." },
       { name: "Spending", description: "Totals, categories and trends." },
       {
         name: "Transactions",
         description: "Individual card and debit order payments.",
       },
       { name: "Goals", description: "Monthly budgets per category." },
-      { name: "Filters", description: "Options for building filter controls." },
+      { name: "Filters", description: "Filter options." },
       {
         name: "Health",
-        description: "Probes for orchestrators and load balancers.",
+        description: "Liveness and readiness probes.",
       },
     ],
     paths,

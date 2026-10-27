@@ -56,7 +56,6 @@ interface TransactionListProps {
   filtered: boolean;
   selectedId?: string;
   detailsId: string;
-  /** Details open beside the table rather than in a dialog. */
   detailsBeside: boolean;
   onSelect: (transaction: Transaction) => void;
   onPageChange: (page: number) => void;

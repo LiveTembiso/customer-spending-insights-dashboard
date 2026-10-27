@@ -1,7 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { getCurrentGoals } from "../server/current";
 
-/** Count of goals that need attention, for the Goals nav item. */
 export async function GoalsAttentionBadge() {
   const response = await getCurrentGoals();
   const count =

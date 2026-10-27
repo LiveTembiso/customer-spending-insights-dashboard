@@ -29,7 +29,6 @@ export interface MonthBar {
   value: number;
   /** striped: the month isn't over; solid: stands out; muted: the rest. */
   look: "striped" | "solid" | "muted";
-  /** Bold month label and value. */
   strong?: boolean;
 }
 
@@ -74,7 +73,6 @@ export function BarTooltip({
 
 interface MonthlyBarChartProps {
   bars: MonthBar[];
-  /** Top of the y-axis. */
   top: number;
   metric: Metric;
   /** Describes the chart for screen readers, with every figure. */
