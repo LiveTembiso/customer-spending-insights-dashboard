@@ -27,7 +27,7 @@ export default function DashboardError({
         <h1
           ref={heading}
           tabIndex={-1}
-          className="text-[22px] font-extrabold tracking-tight text-heading outline-hidden"
+          className="text-[22px] font-extrabold tracking-tight text-heading focus:outline-hidden"
         >
           This page didn&apos;t load
         </h1>
