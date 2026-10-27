@@ -51,6 +51,24 @@ The mock API follows the assessment contract under `/api/customers/{customerId}/
 
 The spec is generated from the same Zod schemas the routes validate with, so it can't drift from the implementation. The demo customer is `12345`.
 
+### Differences from the brief
+
+Paths, parameters and response shapes follow the brief. Where it was silent, the API makes these choices:
+
+- `topCategory` is `null` when the period has no spending, and
+  `comparedToPrevious.spentChange` / `transactionChange` are `null` when the
+  previous period has nothing to compare against (a percentage change from zero
+  is undefined).
+- Goal `status` is `on_track`, `warning` or `exceeded`. A goal is a warning at
+  90% used, or when spending is more than 10 points ahead of the month's pace.
+- `GET transactions` accepts an optional `q` (up to 100 characters) that
+  searches merchant and description; a blank `q` means no search.
+- Invalid query parameters return `400` with
+  `{ "error": { "code": "invalid_query", "message", "issues" } }`, an unknown
+  customer returns `404` (`customer_not_found`), and unexpected failures return
+  `500` (`internal_error`). Every response carries an `X-Request-Id` and
+  `Cache-Control: private, no-store`.
+
 ## Scripts
 
 | Command                 | What it does                      |
@@ -62,8 +80,34 @@ The spec is generated from the same Zod schemas the routes validate with, so it 
 | `npm run typecheck`     | TypeScript, no emit               |
 | `npm run format:check`  | Prettier check                    |
 | `npm test`              | Unit and component tests (Vitest) |
+| `npm run test:watch`    | Unit tests in watch mode          |
 | `npm run test:coverage` | Unit tests with coverage          |
 | `npm run test:e2e`      | End-to-end tests (Playwright)     |
+
+## Testing
+
+```bash
+npm test                     # unit and component tests
+npm run test:coverage        # with a coverage report in coverage/
+```
+
+Component tests use Testing Library and query by role and accessible name, so
+they fail when a control loses its label as well as when it breaks. CI also
+requires 80% line, statement, function and branch coverage on every file a pull
+request changes (`npm run test:coverage:changed [base]`, default
+`origin/main`).
+
+End-to-end tests run in Chromium at desktop size and as a Pixel 7:
+
+```bash
+npx playwright install chromium   # once
+npm run test:e2e                  # starts the dev server if one isn't running
+BASE_URL=http://localhost:3000 npm run test:e2e   # against a running server or container
+```
+
+They cover each page's main flows, phone and tablet widths without horizontal
+scrolling, focus return from dialogs, security headers and a clean Content
+Security Policy. In CI they run against the production Docker image.
 
 ## Project structure
 
