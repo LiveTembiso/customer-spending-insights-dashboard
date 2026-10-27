@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import { GET as docs } from "./docs/route";
@@ -28,6 +30,24 @@ describe("API documentation routes", () => {
       );
       expect(asset.getAttribute("crossorigin")).toBe("anonymous");
     }
+  });
+
+  it("allows only the CDN assets and its own inline script", async () => {
+    const response = docs();
+    const policy = response.headers.get("Content-Security-Policy")!;
+    const document = new DOMParser().parseFromString(
+      await response.text(),
+      "text/html",
+    );
+    const inline = document.querySelector("script:not([src])")!.textContent!;
+    const hash = createHash("sha256").update(inline).digest("base64");
+
+    expect(policy).toContain("default-src 'none'");
+    expect(policy).toContain(
+      `script-src https://cdn.jsdelivr.net 'sha256-${hash}'`,
+    );
+    expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
+    expect(policy).toContain("frame-ancestors 'none'");
   });
 
   it("serves the JSON contract consumed by the viewer with documented customer endpoints", async () => {

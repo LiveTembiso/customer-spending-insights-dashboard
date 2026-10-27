@@ -32,7 +32,8 @@ async function setup() {
 
 afterEach(() => vi.restoreAllMocks());
 
-describe("TransactionDateRange", () => {
+// Each calendar interaction re-renders two month grids, slow in jsdom under load.
+describe("TransactionDateRange", { timeout: 15_000 }, () => {
   it("moves day focus with arrow keys and selects the focused date", async () => {
     await setup();
     const day = screen.getByRole("button", { name: /September 22/ });
@@ -60,7 +61,7 @@ describe("TransactionDateRange", () => {
       start: "2020-02-10",
       end: "2021-06-12",
     });
-  }, 15000);
+  });
 
   it("keeps future months disabled in the current year", async () => {
     await setup();
