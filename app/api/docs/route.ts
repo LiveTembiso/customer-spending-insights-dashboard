@@ -1,5 +1,21 @@
+import { createHash } from "node:crypto";
+
 // Swagger UI from a pinned CDN version, checked with subresource integrity.
 const SWAGGER_UI = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14";
+
+const init = `SwaggerUIBundle({ url: "/api/openapi.json", dom_id: "#swagger-ui" });`;
+const initHash = createHash("sha256").update(init).digest("base64");
+
+const contentSecurityPolicy = [
+  "default-src 'none'",
+  `script-src https://cdn.jsdelivr.net 'sha256-${initHash}'`,
+  "style-src https://cdn.jsdelivr.net 'unsafe-inline'",
+  "img-src 'self' data:",
+  "connect-src 'self'",
+  "base-uri 'none'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+].join("; ");
 
 const html = `<!doctype html>
 <html lang="en">
@@ -16,14 +32,15 @@ const html = `<!doctype html>
     <script src="${SWAGGER_UI}/swagger-ui-bundle.js"
       integrity="sha384-wmyclcVGX/WhUkdkATwhaK1X1JtiNrr2EoYJ+diV3vj4v6OC5yCeSu+yW13SYJep"
       crossorigin="anonymous"></script>
-    <script>
-      SwaggerUIBundle({ url: "/api/openapi.json", dom_id: "#swagger-ui" });
-    </script>
+    <script>${init}</script>
   </body>
 </html>`;
 
 export function GET() {
   return new Response(html, {
-    headers: { "Content-Type": "text/html; charset=utf-8" },
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Security-Policy": contentSecurityPolicy,
+    },
   });
 }
