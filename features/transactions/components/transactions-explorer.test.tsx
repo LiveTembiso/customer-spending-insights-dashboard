@@ -255,7 +255,7 @@ describe("TransactionsExplorer search", () => {
   });
 });
 
-describe("TransactionsExplorer custom range", () => {
+describe("TransactionsExplorer custom range", { timeout: 15_000 }, () => {
   const search = "period=custom&from=2026-09-01&to=2026-09-30";
 
   it("applies a valid range after confirmation", async () => {

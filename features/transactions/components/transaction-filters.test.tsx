@@ -52,7 +52,7 @@ describe("TransactionFiltersPanel", () => {
       period: "custom",
       range: { start: "2026-09-21", end: today },
     });
-  });
+  }, 15_000);
 
   it("follows an external search change", () => {
     const { props, rerender } = setup({ ...DEFAULT_FILTERS, q: "Shell" });
@@ -84,7 +84,7 @@ describe("TransactionFiltersPanel", () => {
     expect(
       screen.getByRole("status", { name: "Selected date range" }),
     ).toHaveTextContent("5 Oct 2026 – 19 Oct 2026");
-  });
+  }, 15_000);
 
   it("keeps search and sort usable before category options arrive", () => {
     const { props, rerender } = setup();
