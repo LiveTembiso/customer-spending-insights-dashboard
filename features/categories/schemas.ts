@@ -40,8 +40,6 @@ export const dateRangePresetSchema = z.object({
   value: periodSchema,
 });
 
-export type DateRangePreset = z.infer<typeof dateRangePresetSchema>;
-
 // GET /api/customers/{customerId}/filters
 export const filtersResponseSchema = z.object({
   categories: z.array(categorySchema),
